@@ -6,4 +6,4 @@
 *.so
 *.dynlib
 target/
-
+*.pro
