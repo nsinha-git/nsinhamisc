@@ -1,0 +1,9 @@
+*.log
+*.out
+*.so
+*.ilk
+*.exe
+*.so
+*.dynlib
+target/
+
