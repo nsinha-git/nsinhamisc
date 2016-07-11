@@ -7,3 +7,4 @@
 *.dynlib
 target/
 *.pro
+.idea/
