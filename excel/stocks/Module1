@@ -1,0 +1,190 @@
+Sub Create_table_flow_momentum_cavg_cindexes()
+'
+' Create_table_flow_momentum_cavg_cindexes Macro
+'
+' Keyboard Shortcut: Option+Cmd+Shift+A
+'
+    ActiveSheet.ListObjects.Add(xlSrcRange, Range("$A$1:$BI$1698"), , xlYes).Name _
+        = "Volumes"
+    Columns("F:F").Select
+    Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+    Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+    Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+    Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+    Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+    Range("Volumes[[#Headers],[Column5]]").Select
+    ActiveCell.FormulaR1C1 = "flow"
+    Range("Volumes[[#Headers],[Column4]]").Select
+    ActiveCell.FormulaR1C1 = "momentum"
+    Range("Volumes[[#Headers],[Column3]]").Select
+    ActiveCell.FormulaR1C1 = "cavg"
+    Range("Volumes[[#Headers],[Column2]]").Select
+    ActiveCell.FormulaR1C1 = "cindex5"
+    Range("Volumes[[#Headers],[Column1]]").Select
+    ActiveCell.FormulaR1C1 = "cindex8"
+    Range("F2").Select
+    ActiveCell.FormulaR1C1 = "=RC[-1]*RC[-3]"
+    Range("H2").Select
+    ActiveCell.FormulaR1C1 = "=RC[-3]/RC[43]"
+    Range("I2").Select
+    ActiveCell.FormulaR1C1 = "=(1/(5-ABS(RC[-5])))*(ABS(1/(5-RC[-1])))"
+    Range("J2").Select
+    ActiveCell.FormulaR1C1 = "=(1/(5-ABS(RC[-6])))*(ABS(1/(8-RC[-2])))"
+    Range("G2").Select
+    ActiveCell.FormulaR1C1 = "=RC[-4]*1000000/SQRT(RC[-1]*SIGN(RC[-1]))/RC[-5]"
+    Columns("G:G").Select
+    Selection.NumberFormat = "0.00"
+    Columns("H:H").Select
+    Selection.NumberFormat = "0.00"
+    Columns("I:I").Select
+    Selection.NumberFormat = "0.00"
+    Columns("J:J").Select
+    Selection.NumberFormat = "0.00"
+    ActiveSheet.ListObjects("Volumes").ShowTotals = True
+    Range("Volumes[#Totals],[Volume]").Select
+    ActiveCell.FormulaR1C1 = "=AGGREGATE(9,,[Volume])/ROWS(Volumes)/1000000"
+    Range("Volumes[#Totals],[Flow]]").Select
+    ActiveCell.FormulaR1C1 = "=AGGREGATE(9,,[Flow])/ROWS(Volumes)/1000000"
+    ActiveSheet.ListObjects("Volumes").Sort.SortFields.Clear
+    ActiveSheet.ListObjects("Volumes").Sort.SortFields.Add Key:=Range("Volumes[[#Headers],[#Data],[cavg]]"), _
+        SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+    ActiveSheet.ListObjects("Volumes").Sort.Apply
+
+End Sub
+
+Sub CreateNewSheetandReferThisOne()
+'
+' Macro4 Macro
+'
+
+'
+
+    ActiveSheet.Name = "Volumes"
+    ActiveSheet.ListObjects(1).Name = "Volumes"
+    Sheets.Add.Name = "Winners"
+    Sheets.Add.Name = "Loosers"
+    Sheets.Add.Name = "FlowWinners"
+    Sheets.Add.Name = "FlowLoosers"
+    Application.CutCopyMode = False
+    Sheets("Volumes").Select
+    Range("Volumes[#All]").Select
+    Selection.Copy
+    
+
+    Sheets("Winners").Select
+    ActiveSheet.Paste
+    ActiveSheet.ListObjects(1).Name = "Winners"
+    ActiveSheet.ListObjects("Winners").Sort.SortFields.Clear
+    ActiveSheet.ListObjects("Winners").Sort.SortFields.Add Key:=Range("Winners[[#Headers],[#Data],[% Chg]]"), _
+        SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+    ActiveSheet.ListObjects("Winners").Sort.Apply
+
+
+    Sheets("Loosers").Select
+    ActiveSheet.Paste
+    ActiveSheet.ListObjects(1).Name = "Loosers"
+    ActiveSheet.ListObjects("Loosers").Sort.SortFields.Clear
+    ActiveSheet.ListObjects("Loosers").Sort.SortFields.Add Key:=Range("Loosers[[#Headers],[#Data],[% Chg]]"), _
+        SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+    ActiveSheet.ListObjects("Loosers").Sort.Apply
+
+    Sheets("FlowWinners").Select
+    ActiveSheet.Paste
+    ActiveSheet.ListObjects(1).Name = "FlowWinners"
+    ActiveSheet.ListObjects("FlowWinners").Sort.SortFields.Clear
+    ActiveSheet.ListObjects("FlowWinners").Sort.SortFields.Add Key:=Range("FlowWinners[[#Headers],[#Data],[flow]]"), _
+        SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+    ActiveSheet.ListObjects("FlowWinners").Sort.Apply
+
+
+    Sheets("FlowLoosers").Select
+    ActiveSheet.Paste
+    ActiveSheet.ListObjects(1).Name = "FlowLoosers"
+    ActiveSheet.ListObjects("FlowLoosers").Sort.SortFields.Clear
+    ActiveSheet.ListObjects("FlowLoosers").Sort.SortFields.Add Key:=Range("FlowLoosers[[#Headers],[#Data],[flow]]"), _
+        SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+    ActiveSheet.ListObjects("FlowLoosers").Sort.Apply
+
+
+    '
+    Msg = ActiveSheet.ListObjects(1)
+    MsgBox Msg
+
+ 
+
+    
+
+End Sub
+
+Sub Macro6()
+'
+' Macro6 Macro
+'
+    srcWorkbookName = "Securities_to_Watch2016.08.09.21.54.19.xlsb"
+    srcSheetName = "FlowLoosers"
+    destWorkbookName = ActiveWorkbook.Name
+    destSheetName = ActiveSheet.Name
+    Msg = destWorkbookName & destSheetName
+    MsgBox Msg
+' Activate Src Workbook
+    For Each book In Workbooks
+        If book.Name = srcWorkbookName Then
+            book.Activate
+        End If
+    Next book
+'    copy a range from src to dest
+    ActiveWorkbook.Sheets.Item(srcSheetName).Activate
+    Range("A2:A21").Select
+    Selection.Copy
+' Activate Dest Workbook
+    For Each book In Workbooks
+        If book.Name = destWorkbookName Then
+            book.Activate
+        End If
+    Next book
+    ActiveWorkbook.Sheets.Item(destSheetName).Activate
+    Range("A2").Select
+    ActiveSheet.Paste
+'
+    
+End Sub
+
+
+
+Sub Macro7()
+'
+' Macro6 Macro
+'
+    srcWorkbookName = "Securities_to_Watch2016.08.09.21.54.19.xlsb"
+    srcSheetName = "FlowLoosers"
+    destWorkbookName = ActiveWorkbook.Name
+    destSheetName = ActiveSheet.Name
+    Msg = destWorkbookName & destSheetName
+    MsgBox Msg
+' Activate Src Workbook
+    For Each book In Workbooks
+        If book.Name = srcWorkbookName Then
+            book.Activate
+        End If
+    Next book
+'    copy a range from src to dest
+    ActiveWorkbook.Sheets.Item(srcSheetName).Activate
+    srcTableName = ActiveSheet.ListObjects(srcSheetName)
+    srcTableRangeString = srcTableName & "[Symbol]"
+    Range(srcTableRangeString).Select
+    Selection.Copy
+' Activate Dest Workbook
+    For Each book In Workbooks
+        If book.Name = destWorkbookName Then
+            book.Activate
+        End If
+    Next book
+    ActiveWorkbook.Sheets.Item(destSheetName).Activate
+    Range("A2").Select
+    ActiveSheet.Paste
+
+    
+'
+    
+End Sub
+
