@@ -52,139 +52,46 @@ Sub Create_table_flow_momentum_cavg_cindexes()
 
 End Sub
 
-Sub CreateNewSheetandReferThisOne()
-'
-' Macro4 Macro
-'
+Sub CreateNewSheetToActiveWorkBook(ByVal newSheetName As String)
+    Sheets.Add.Name = newSheetName
+End Sub
 
-'
+Sub PasteAndSortToTheCleanSheet(ByVal sheetName As String, ByVal sortOrder As XlSortOrder, ByVal sortField As String)
+    Sheets(sheetName).Select
+    ActiveSheet.Paste
+    ActiveSheet.ListObjects(1).Name = sheetName
+    ActiveSheet.ListObjects(sheetName).Sort.SortFields.Clear
+       ActiveSheet.ListObjects(sheetName).Sort.SortFields.Add Key:=Range(sheetName & "[[#Headers],[#Data],[" & sortField & "]]"), _
+        SortOn:=xlSortOnValues, Order:=sortOrder, DataOption:=xlSortNormal
+    ActiveSheet.ListObjects(sheetName).Sort.Apply
+End Sub
 
+Sub CreateNewSheetsandPasteThisOne()
+'
+'
     ActiveSheet.Name = "Volumes"
     ActiveSheet.ListObjects(1).Name = "Volumes"
-    Sheets.Add.Name = "Winners"
-    Sheets.Add.Name = "Loosers"
-    Sheets.Add.Name = "FlowWinners"
-    Sheets.Add.Name = "FlowLoosers"
+    CreateNewSheetToActiveWorkBook ("Winners")
+    CreateNewSheetToActiveWorkBook ("Loosers")
+    CreateNewSheetToActiveWorkBook ("FlowWinners")
+    CreateNewSheetToActiveWorkBook ("FlowLoosers")
     Application.CutCopyMode = False
     Sheets("Volumes").Select
     Range("Volumes[#All]").Select
     Selection.Copy
+
     
-
-    Sheets("Winners").Select
-    ActiveSheet.Paste
-    ActiveSheet.ListObjects(1).Name = "Winners"
-    ActiveSheet.ListObjects("Winners").Sort.SortFields.Clear
-    ActiveSheet.ListObjects("Winners").Sort.SortFields.Add Key:=Range("Winners[[#Headers],[#Data],[% Chg]]"), _
-        SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
-    ActiveSheet.ListObjects("Winners").Sort.Apply
-
-
-    Sheets("Loosers").Select
-    ActiveSheet.Paste
-    ActiveSheet.ListObjects(1).Name = "Loosers"
-    ActiveSheet.ListObjects("Loosers").Sort.SortFields.Clear
-    ActiveSheet.ListObjects("Loosers").Sort.SortFields.Add Key:=Range("Loosers[[#Headers],[#Data],[% Chg]]"), _
-        SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
-    ActiveSheet.ListObjects("Loosers").Sort.Apply
-
-    Sheets("FlowWinners").Select
-    ActiveSheet.Paste
-    ActiveSheet.ListObjects(1).Name = "FlowWinners"
-    ActiveSheet.ListObjects("FlowWinners").Sort.SortFields.Clear
-    ActiveSheet.ListObjects("FlowWinners").Sort.SortFields.Add Key:=Range("FlowWinners[[#Headers],[#Data],[flow]]"), _
-        SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
-    ActiveSheet.ListObjects("FlowWinners").Sort.Apply
-
-
-    Sheets("FlowLoosers").Select
-    ActiveSheet.Paste
-    ActiveSheet.ListObjects(1).Name = "FlowLoosers"
-    ActiveSheet.ListObjects("FlowLoosers").Sort.SortFields.Clear
-    ActiveSheet.ListObjects("FlowLoosers").Sort.SortFields.Add Key:=Range("FlowLoosers[[#Headers],[#Data],[flow]]"), _
-        SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
-    ActiveSheet.ListObjects("FlowLoosers").Sort.Apply
-
-
+    PasteAndSortToTheCleanSheet "Winners", xlDescending, "% Chg"
+', sortOrder, "% Chg")
+    PasteAndSortToTheCleanSheet "Loosers", xlAscending,"% Chg"
+    PasteAndSortToTheCleanSheet "FlowWinners", xlDescending, "flow"
+    PasteAndSortToTheCleanSheet "FlowLoosers", xlAscending, "flow"
+    
     '
     Msg = ActiveSheet.ListObjects(1)
     MsgBox Msg
 
- 
-
-    
 
 End Sub
 
-Sub Macro6()
-'
-' Macro6 Macro
-'
-    srcWorkbookName = "Securities_to_Watch2016.08.09.21.54.19.xlsb"
-    srcSheetName = "FlowLoosers"
-    destWorkbookName = ActiveWorkbook.Name
-    destSheetName = ActiveSheet.Name
-    Msg = destWorkbookName & destSheetName
-    MsgBox Msg
-' Activate Src Workbook
-    For Each book In Workbooks
-        If book.Name = srcWorkbookName Then
-            book.Activate
-        End If
-    Next book
-'    copy a range from src to dest
-    ActiveWorkbook.Sheets.Item(srcSheetName).Activate
-    Range("A2:A21").Select
-    Selection.Copy
-' Activate Dest Workbook
-    For Each book In Workbooks
-        If book.Name = destWorkbookName Then
-            book.Activate
-        End If
-    Next book
-    ActiveWorkbook.Sheets.Item(destSheetName).Activate
-    Range("A2").Select
-    ActiveSheet.Paste
-'
-    
-End Sub
-
-
-
-Sub Macro7()
-'
-' Macro6 Macro
-'
-    srcWorkbookName = "Securities_to_Watch2016.08.09.21.54.19.xlsb"
-    srcSheetName = "FlowLoosers"
-    destWorkbookName = ActiveWorkbook.Name
-    destSheetName = ActiveSheet.Name
-    Msg = destWorkbookName & destSheetName
-    MsgBox Msg
-' Activate Src Workbook
-    For Each book In Workbooks
-        If book.Name = srcWorkbookName Then
-            book.Activate
-        End If
-    Next book
-'    copy a range from src to dest
-    ActiveWorkbook.Sheets.Item(srcSheetName).Activate
-    srcTableName = ActiveSheet.ListObjects(srcSheetName)
-    srcTableRangeString = srcTableName & "[Symbol]"
-    Range(srcTableRangeString).Select
-    Selection.Copy
-' Activate Dest Workbook
-    For Each book In Workbooks
-        If book.Name = destWorkbookName Then
-            book.Activate
-        End If
-    Next book
-    ActiveWorkbook.Sheets.Item(destSheetName).Activate
-    Range("A2").Select
-    ActiveSheet.Paste
-
-    
-'
-    
-End Sub
 
