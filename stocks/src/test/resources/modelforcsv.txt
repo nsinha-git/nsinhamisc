@@ -1,0 +1,38 @@
+<model>
+	<symbol>
+		<map>Symbol</map>
+    	<type>string</map>
+	</symbol>
+	<endprice>
+    		<map>Last Price</map>
+    		<type>price</map>
+	</endprice>
+	<startprice>
+    		<map>Open</map>
+    		<type>price</map>
+	</startprice>
+	<highprice>
+    		<map>High</map>
+    		<type>price</map>
+	</highprice>
+	<lowprice>
+    		<map>Low</map>
+    		<type>price</map>
+	</lowprice>
+	<prevprice>
+    		<map>Prev Close</map>
+    		<type>price</map>
+	</prevprice>
+	<percentchange>
+		<map>% Chg</map>
+   		<type>percentage</map>
+	</percentchange>
+	<volume>
+		<map>Volume</map>
+  		<type>volume</map>
+	</volume>
+	<companyname>
+		<map>Company Name</map>
+  		<type>companyname</map>
+	</companyname>
+</model>
