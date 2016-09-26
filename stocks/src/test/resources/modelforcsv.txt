@@ -3,6 +3,10 @@
 		<map>Symbol</map>
     	<type>string</map>
 	</symbol>
+	<prevclose>
+    		<map>Prev Close</map>
+    		<type>price</map>
+	</prevclose>
 	<endprice>
     		<map>Last Price</map>
     		<type>price</map>
@@ -19,10 +23,6 @@
     		<map>Low</map>
     		<type>price</map>
 	</lowprice>
-	<prevprice>
-    		<map>Prev Close</map>
-    		<type>price</map>
-	</prevprice>
 	<percentchange>
 		<map>% Chg</map>
    		<type>percentage</map>
@@ -35,4 +35,12 @@
 		<map>Company Name</map>
   		<type>companyname</map>
 	</companyname>
+	<startdatetime>
+		<map> Start DateTime</map>
+  		<type>DateTime</map>
+	</startdatetime>
+	<enddatetime>
+		<map> End DateTime</map>
+  		<type>DateTime</map>
+	<enddatetime>
 </model>

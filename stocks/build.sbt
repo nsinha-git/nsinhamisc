@@ -15,7 +15,9 @@ libraryDependencies ++= {
     "org.skinny-framework" %% "skinny-orm"      % "2.0.5",
     "org.json4s" %% "json4s-native" % "3.2.11",
     "org.json4s" %% "json4s-jackson" % "3.2.11",
+    "net.liftweb" % "lift-json_2.11" % "3.0-M8",
     "net.sf.opencsv" % "opencsv" % "2.3",
+    "joda-time" % "joda-time" % "2.9.4" ,
     "org.slf4j" % "slf4j-log4j12" % "1.7.13"
   )
 }

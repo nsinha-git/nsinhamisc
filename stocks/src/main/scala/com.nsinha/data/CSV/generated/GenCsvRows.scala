@@ -1,11 +1,9 @@
 package main.scala.com.nsinha.data.CSV.generated
 
-
-import java.util.Date
-
 import main.scala.com.nsinha.data.CSV.{CsvRow, Percent, Price, Volume}
+import org.joda.time.DateTime
 
-case class GenCsvRows (date: Date, symbol: String, endprice: Price, startprice: Price, highprice: Price, lowprice: Price, volume: Volume, companyname: String, percentagechange: Percent) extends CsvRow(date)
+case class GenCsvRows (datetimeStart: Long, datetimeEnd: Long, symbol: String, prevprice: Price, endprice: Price, startprice: Price, highprice: Price, lowprice: Price, volume: Volume, companyname: String, percentagechange: Percent) extends CsvRow()
 {
   override def getKey(): String = symbol
 }

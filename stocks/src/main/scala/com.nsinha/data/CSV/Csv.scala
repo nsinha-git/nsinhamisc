@@ -3,9 +3,11 @@ package main.scala.com.nsinha.data.CSV
 import java.io.{File, FileOutputStream}
 import java.util.Date
 
+import org.joda.time.DateTime
 
 
-abstract class CsvRow(date: Date){
+
+abstract class CsvRow {
   def maptorows: CsvRow = {
    null
   }
@@ -67,12 +69,14 @@ object Percent{
 trait Csv {
   def readModelMap(file: File): CsvModel
   def readCsv(file: File, csvModel: CsvModel, classzz: Class[_]): List[CsvRow]
+  def getDates(file: File): List[DateTime]
   def writeTopVolume(i: Int): List[CsvRow]
   def writeTopGainers(i: Int): List[CsvRow]
   def writeTopLoosers(i: Int): List[CsvRow]
   def writeTopFlowers(i: Int): List[CsvRow]
   def extractWatchers(file: File): List[CsvRow]
   def appendToAggregateAnalysisFile[A >: CsvRow](file: File, csvRows: List[A]): Unit
+  def appendDataToYearFile(metaDataYearFile: String,  yearFile: String): Unit
 }
 
 case class CsvModel(map:Map[String, String])
