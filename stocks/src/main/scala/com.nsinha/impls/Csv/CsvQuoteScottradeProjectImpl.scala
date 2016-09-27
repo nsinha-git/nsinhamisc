@@ -1,28 +1,24 @@
-package main.scala.com.nsinha.impls.CSV
+package main.scala.com.nsinha.impls.Csv
 
-import java.io.{File, FileOutputStream, FileWriter}
-import java.util.Date
+import java.io.{File, FileWriter}
 
+import com.nsinha.data.Csv._
 import com.nsinha.utils.{DateTimeUtils, Loggable}
 import org.json4s.DefaultFormats
 import org.json4s.native.Serialization.writePretty
-import org.json4s.jackson.JsonMethods._
 import org.joda.time.DateTime
-import main.scala.com.nsinha.data.CSV.generated.GenCsvRows
-
 import scala.io.Source
-import main.scala.com.nsinha.data.CSV._
+import main.scala.com.nsinha.data.Csv.CsvQuoteScottradeProject
+import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 
 
-class CsvImplVer1(modelFilePath: String, csvFilePath: String, classzz: Class[_]) extends Csv with Loggable {
+class CsvQuoteScottradeProjectImpl(modelFilePath: String, csvFilePath: String, classzz: Class[_]) extends CsvQuoteScottradeProject with Loggable {
   val modelFile = new File(modelFilePath)
   val csvFile = new File(csvFilePath)
   var startDateTime: DateTime = null
   var endDateTime: DateTime = null
-
   val csvModel = readModelMap(modelFile)
   val rows = readCsv(csvFile, csvModel, classzz)
-
 
   def readModelMap(file: File): CsvModel = {
     val s: Source = Source.fromFile(file)
@@ -63,14 +59,14 @@ class CsvImplVer1(modelFilePath: String, csvFilePath: String, classzz: Class[_])
   }
 
 
-  override def readCsv(file: File, csvModel: CsvModel, classzz: Class[_]): List[GenCsvRows] = {
+  override def readCsv(file: File, csvModel: CsvModel, classzz: Class[_]): List[GenCsvQuoteRowScottrade] = {
     val source = Source.fromFile(file, "UTF-8")
     val prefix = file.getName().split("\\.")(0)
     parseDate(file)
     var i = 0
     var start = false
     var cols: Map[String, Int] = null
-    var result: List[GenCsvRows] = List()
+    var result: List[GenCsvQuoteRowScottrade] = List()
     for (line <- source.getLines()) {
       start match {
         case false => if (line.length > 1) {
@@ -102,30 +98,30 @@ class CsvImplVer1(modelFilePath: String, csvFilePath: String, classzz: Class[_])
     }
   }
 
-  override def writeTopVolume(i: Int): List[GenCsvRows] = {
+  override def writeTopVolume(i: Int): List[GenCsvQuoteRowScottrade] = {
     implicit val format = DefaultFormats
-    rows.sortWith(GenCsvRows.sort("volume", true) )
+    rows.sortWith(GenCsvQuoteRowScottrade.sort("volume", true) )
     rows.take(i)
   }
 
-  override def writeTopGainers(i: Int): List[GenCsvRows] = {
+  override def writeTopGainers(i: Int): List[GenCsvQuoteRowScottrade] = {
     implicit val format = DefaultFormats
-    rows.sortWith(GenCsvRows.sort("percent", true) )
+    rows.sortWith(GenCsvQuoteRowScottrade.sort("percent", true) )
     rows.take(i)
   }
-  override def writeTopLoosers(i: Int): List[GenCsvRows] = {
+  override def writeTopLoosers(i: Int): List[GenCsvQuoteRowScottrade] = {
     implicit val format = DefaultFormats
-    rows.sortWith(GenCsvRows.sort("percent", false) )
-    rows.take(i)
-  }
-
-  override def writeTopFlowers(i: Int): List[GenCsvRows] = {
-    implicit val format = DefaultFormats
-    rows.sortWith(GenCsvRows.sort("flow", true) )
+    rows.sortWith(GenCsvQuoteRowScottrade.sort("percent", false) )
     rows.take(i)
   }
 
-  override def extractWatchers (file: File): List[GenCsvRows]= {
+  override def writeTopFlowers(i: Int): List[GenCsvQuoteRowScottrade] = {
+    implicit val format = DefaultFormats
+    rows.sortWith(GenCsvQuoteRowScottrade.sort("flow", true) )
+    rows.take(i)
+  }
+
+  override def extractWatchers (file: File): List[GenCsvQuoteRowScottrade]= {
     implicit val format = DefaultFormats
     val src = Source.fromFile(file)
     val allLines = src.getLines()
@@ -143,7 +139,7 @@ class CsvImplVer1(modelFilePath: String, csvFilePath: String, classzz: Class[_])
     watchedRows
   }
 
-  override def appendToAggregateAnalysisFile[A >: CsvRow](file: File, csvrows: List[A]): Unit = {
+  override def appendToAggregateAnalysisFile[A >: CsvQuoteRow](file: File, csvrows: List[A]): Unit = {
     implicit val format = DefaultFormats
     val json = writePretty(csvrows)
     val fileWriter = new FileWriter(file)
@@ -196,8 +192,8 @@ class CsvImplVer1(modelFilePath: String, csvFilePath: String, classzz: Class[_])
     res
   }
 
- private def mapToCsvRow(rowCols: Map[String,String], prefix: String): GenCsvRows = {
-   GenCsvRows(startDateTime.getMillis, endDateTime.getMillis, symbol = rowCols("symbol"), prevprice = Price(rowCols("prevclose")), endprice = Price(rowCols("endprice")),
+ private def mapToCsvRow(rowCols: Map[String,String], prefix: String): GenCsvQuoteRowScottrade = {
+   GenCsvQuoteRowScottrade(startDateTime.getMillis, endDateTime.getMillis, symbol = rowCols("symbol"), prevprice = Price(rowCols("prevclose")), endprice = Price(rowCols("endprice")),
      startprice = Price(rowCols("startprice")), highprice = Price(rowCols("highprice")), lowprice = Price(rowCols("lowprice")),
      volume = Volume(rowCols("volume")), companyname = rowCols("companyname"), percentagechange = Percent(rowCols("percentchange"))
    )

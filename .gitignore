@@ -5,6 +5,10 @@
 *.exe
 *.so
 *.dynlib
+*.swp
+*.pdf
+*.vrb
+*.toc
 target/
 *.pro
 .idea/
