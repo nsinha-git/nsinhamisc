@@ -1,11 +1,11 @@
-package main.scala.com.nsinha.data.Csv
+package com.nsinha.data.Project
 
-import java.io.{File, FileOutputStream}
-import java.util.Date
-import com.nsinha.data.Csv.{CsvModel, CsvQuoteRow, CsvRow}
+import java.io.File
+
+import com.nsinha.data.Csv.{CsvModel, CsvQuoteRow}
 import org.joda.time.DateTime
 
-trait CsvQuoteScottradeProject {
+trait CsvQuoteScottradeProject extends Project {
   def readModelMap(file: File): CsvModel
   def readCsv(file: File, csvModel: CsvModel, classzz: Class[_]): List[CsvQuoteRow]
   def getDates(file: File): List[DateTime]

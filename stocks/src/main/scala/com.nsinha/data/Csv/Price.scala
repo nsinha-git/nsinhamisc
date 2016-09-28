@@ -5,7 +5,8 @@ package com.nsinha.data.Csv
   */
 object Price {
   def apply(s:String): Price = {
-    Price(s.toDouble)
+    val ss = s.replaceAll("\\$","")
+    Price(ss.toDouble)
   }
 }
 case class Price(value: Double) extends Ordered[Price] {

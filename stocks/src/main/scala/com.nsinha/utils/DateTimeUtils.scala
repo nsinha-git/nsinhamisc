@@ -1,11 +1,15 @@
 package com.nsinha.utils
 
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+
 import org.joda.time.DateTime
+//import org.joda.time.format.DateTimeFormat
 
 /**
   * Created by nishchaysinha on 9/24/16.
   */
-object DateTimeUtils {
+object DateTimeUtils extends Loggable {
 
   def sort(dates: List[DateTime]): List[DateTime] = {
     val sortedDates = dates.sortWith((x,y) => {
@@ -50,5 +54,14 @@ object DateTimeUtils {
     } else 0
     startDayTimeOfYear.plusDays(toAddForBusinessDay).withTimeAtStartOfDay().plusHours(13).plusMinutes(30)
 
+  }
+
+  def parseDateTime(date: String, time: String, format: String = "MM/dd/yyyy hh:mm:ss a") : DateTime = {
+    val dtf = new SimpleDateFormat(format)
+    val dateTime = dtf.parse(date + " " + time)
+    dateTime.getTime
+    val dt = new DateTime(dateTime.getTime)
+    logger.debug(s"datetime = $date $time o/p=$dateTime ${dt.getMillis}")
+    dt
   }
 }

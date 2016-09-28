@@ -2,7 +2,6 @@ package main.scala.com.nsinha.data.AggregateData
 
 import java.io.File
 
-import main.scala.com.nsinha.data.CSV.generated.GenCsvRowsScottradeQuote$
 
 trait AggregateData
 class AggregateDataVer1Dot0Dot0 extends AggregateData

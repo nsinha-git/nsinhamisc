@@ -7,6 +7,15 @@ object Volume{
   def apply(s:String): Volume= {
     Volume(s.toDouble)
   }
+
+  def - (x: Volume, y: Volume): Volume = {
+    Volume(x.value - y.value)
+  }
+
+  def > (x: Volume, y: Volume): Boolean = {
+    x.value > y.value
+  }
+
 }
 case class Volume(value: Double) extends Ordered[Volume] {
    def compare(other: Volume): Int = {
@@ -18,5 +27,6 @@ case class Volume(value: Double) extends Ordered[Volume] {
       1
     }
   }
+
 
 }

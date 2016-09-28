@@ -1,15 +1,16 @@
-package main.scala.com.nsinha.impls.Csv
+package com.nsinha.impls.Project.Quotes
 
 import java.io.{File, FileWriter}
 
 import com.nsinha.data.Csv._
+import com.nsinha.data.Project.CsvQuoteScottradeProject
 import com.nsinha.utils.{DateTimeUtils, Loggable}
+import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
+import org.joda.time.DateTime
 import org.json4s.DefaultFormats
 import org.json4s.native.Serialization.writePretty
-import org.joda.time.DateTime
+
 import scala.io.Source
-import main.scala.com.nsinha.data.Csv.CsvQuoteScottradeProject
-import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 
 
 class CsvQuoteScottradeProjectImpl(modelFilePath: String, csvFilePath: String, classzz: Class[_]) extends CsvQuoteScottradeProject with Loggable {
@@ -147,52 +148,7 @@ class CsvQuoteScottradeProjectImpl(modelFilePath: String, csvFilePath: String, c
     fileWriter.close()
   }
 
-  private def createColsList(line: String, csvModel: CsvModel, prefix: String): Map[String, Int] = {
-    val preModelCols = line.split(",").map(_.trim)
-    val cols: Map[String, Int] = mapModel(csvModel, preModelCols,prefix)
-    cols
-  }
-
-  private def mapModel(csvModel: CsvModel, preModelCols: Array[String], prefix: String): Map[String, Int]= {
-    var map : Map[String,Int] = Map()
-    var i = 0
-    val modelMap = csvModel.map
-    for (preModelCol <- preModelCols) {
-      val mappedCol = modelMap.get(preModelCol.toString)
-      mappedCol match {
-        case None =>
-        case Some(x) =>
-          map = map + ( s"$x" ->i)
-      }
-      i = i + 1
-    }
-    map
-  }
-
-  private def encode(line: String) : String = {
-    val splitsAtColon = line.split("\"")
-    var ll: String = ""
-    for (i <- Range(0,splitsAtColon.length)) {
-      val x =i%2 match {
-        case 1 => splitsAtColon(i).replaceAll(",","")
-        case  _ => splitsAtColon(i)
-      }
-      ll = ll + x
-    }
-    ll.replaceAll("\\+","").replaceAll("-","").replaceAll("%","")
-  }
-
-  private def extractRowCols(line: String, cols: Map[String, Int]): Map[String, String] = {
-    val allCols = encode(line).split(",")
-    var res :Map[String, String]= Map()
-    for (x <- cols.keys){
-      val y = allCols(cols(x))
-      res = res + (x->y)
-    }
-    res
-  }
-
- private def mapToCsvRow(rowCols: Map[String,String], prefix: String): GenCsvQuoteRowScottrade = {
+ def mapToCsvRow(rowCols: Map[String,String], prefix: String): GenCsvQuoteRowScottrade = {
    GenCsvQuoteRowScottrade(startDateTime.getMillis, endDateTime.getMillis, symbol = rowCols("symbol"), prevprice = Price(rowCols("prevclose")), endprice = Price(rowCols("endprice")),
      startprice = Price(rowCols("startprice")), highprice = Price(rowCols("highprice")), lowprice = Price(rowCols("lowprice")),
      volume = Volume(rowCols("volume")), companyname = rowCols("companyname"), percentagechange = Percent(rowCols("percentchange"))
