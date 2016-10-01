@@ -1,5 +1,8 @@
 package com.nsinha.impls.Project
 
+import java.io.{File, FileWriter}
+
+import com.nsinha.impls.Project.JsonCsvProject.JsonCsvProjectImpl
 import com.nsinha.impls.Project.Orders.CsvOrderScottradeProjectImpl
 import com.nsinha.impls.Project.Quotes.CsvQuoteScottradeProjectImpl
 import com.nsinha.utils.Loggable
@@ -18,7 +21,18 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
   }
 
   test("test2") {
-    val orderImpl = new CsvOrderScottradeProjectImpl(modelFilePath = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/modelforcsv.txt",dumpFilePath = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/CompletedOrders_datestart09272016T16:00:00Zdateend.csv")
-    orderImpl.dumpPerformance("/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/test")
+    val quoteImpl = new CsvQuoteScottradeProjectImpl(modelFilePath = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/modelforcsv.txt", csvFilePath = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/Securities_to_Watch2016.09.30.16.13.43datestart09302016T16:00:00Zdateend.csv", classzz = GenCsvQuoteRowScottrade.getClass)
+    val orderImpl = new CsvOrderScottradeProjectImpl(modelFilePath = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/modelforcsv.txt",dumpFilePath = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/CompletedOrders_datestart09272016T16:00:00Zdateend.csv", quoteImpl)
+    orderImpl.dumpPerformanceCurrentHolds("/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/test")
+  }
+
+  test("csvtest") {
+    val jsonCsv = new JsonCsvProjectImpl(modelFile = "" , jsonFile = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/test", csvFile = "")
+    val str = jsonCsv.changeAJsonToCsv()
+    val fw= new FileWriter("/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/currentStats.csv")
+    println(str)
+    fw.write(str)
+    fw.close()
+
   }
 }

@@ -19,7 +19,7 @@ class CsvQuoteScottradeProjectImpl(modelFilePath: String, csvFilePath: String, c
   var startDateTime: DateTime = null
   var endDateTime: DateTime = null
   val csvModel = readModelMap(modelFile)
-  val rows = readCsv(csvFile, csvModel, classzz)
+  val rows: List[GenCsvQuoteRowScottrade]  = readCsv(csvFile, csvModel, classzz)
 
   def readModelMap(file: File): CsvModel = {
     val s: Source = Source.fromFile(file)
@@ -50,6 +50,10 @@ class CsvQuoteScottradeProjectImpl(modelFilePath: String, csvFilePath: String, c
     } toList
 
     DateTimeUtils.sort(dates)
+  }
+
+  override def getQuote(symbol: String, `type`: String): Price = {
+    {rows filter (r => r.symbol == symbol)}.head.endprice
   }
 
   def parseDate(file:File) = {

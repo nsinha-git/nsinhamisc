@@ -6,6 +6,7 @@ package com.nsinha.data.Csv
 object Price {
   def apply(s:String): Price = {
     val ss = s.replaceAll("\\$","")
+
     Price(ss.toDouble)
   }
 }

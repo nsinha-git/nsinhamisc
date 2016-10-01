@@ -4,7 +4,7 @@ import java.io.{File, FileWriter}
 
 import com.nsinha.data.Csv._
 import com.nsinha.data.Csv.generated.GenCsvOrderRowScottrade
-import com.nsinha.data.Project.CsvOrderScottradeProject
+import com.nsinha.data.Project.{CsvOrderScottradeProject, CsvQuoteScottradeProject}
 import com.nsinha.data.TypeOfTransaction
 import com.nsinha.utils.{DateTimeUtils, Loggable}
 import org.json4s.DefaultFormats
@@ -17,7 +17,7 @@ import scala.io.Source
   * class GenCsvOrderRowScottrade (datetime: Long, symbol: String, executionPrice: Price, executedVolume: Volume,  typeOfExecution: Execution) extends  CsvOrderRow
   * Created by nishchaysinha on 9/26/16.
   */
-class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String) extends CsvOrderScottradeProject with Loggable {
+class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String, quoteScottradeProject: CsvQuoteScottradeProject) extends CsvOrderScottradeProject with Loggable {
 
   val modelFile = new File(modelFilePath)
   val dumpFile = new File(dumpFilePath)
@@ -90,6 +90,7 @@ class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String) 
     implicit val format = DefaultFormats
     val fw = new FileWriter(file)
     fw.write(writePretty(transactions))
+    fw.close()
   }
 
   override def dumpPerformanceMostRecentFirst(file: String) = {
@@ -100,24 +101,24 @@ class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String) 
     implicit val format = DefaultFormats
     val fw = new FileWriter(file)
     fw.write(writePretty(unfinishedTransactions))
+    fw.close()
   }
 
   private def createUnfinishedTransactions(trans: Map[String, List[TransactionRow]]): Map[String, List[TransactionRow]] = {
     //all those transactions that  have unfinished trans
-    val unfinishedTrans = findUnfinishedTrans()
+    val unfinishedTrans = findUnfinishedTrans(trans)
     unfinishedTrans
   }
 
-  private def findUnfinishedTrans(): Map[String, List[TransactionRow]] = {
-    transactions map {t =>
+  private def findUnfinishedTrans(trans: Map[String, List[TransactionRow]]): Map[String, List[TransactionRow]] = {
+    val uf = trans map {t =>
       t._1 -> findUnfinishedTransFromTransList(t._2)
     }
+    uf filter (_._2.size > 0)
   }
 
   private def findUnfinishedTransFromTransList(transList: List[TransactionRow]): List[TransactionRow] = {
-    transList filter ((x) => {
-      if(x.diff == None) true else false
-    })
+    transList filter (x => x.complete == false)
   }
 
 
@@ -136,7 +137,7 @@ class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String) 
     val price2 = mostRecent.executionPrice
     val trans = TransactionRow(symbol = mostRecent.symbol, dateTime = mostRecent.datetime,
       volume = Volume(Math.min(mostRecent.executedVolume.value, currentAdj.executedVolume.value)), initPrice = price1, endPrice = price2,
-      diff = Option(Flow(mostRecent.executedVolume.value * (price2.value - price1.value))), typeOfTransaction = TypeOfTransaction(currentAdj.typeOfExecution))
+      diff = Flow(mostRecent.executedVolume.value * (price2.value - price1.value)), typeOfTransaction = TypeOfTransaction(currentAdj.typeOfExecution), complete = true)
 
     logger.debug(s"transaction created = ${trans}")
     trans
@@ -144,10 +145,10 @@ class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String) 
 
   private def createTransaction(currentAdj: GenCsvOrderRowScottrade): TransactionRow = {
     val price1 = currentAdj.executionPrice
-    val price2 = Price(0)
+    val price2 = quoteScottradeProject.getQuote(currentAdj.symbol,"end")
     TransactionRow(symbol = currentAdj.symbol, dateTime = currentAdj.datetime,
       volume = currentAdj.executedVolume, initPrice = price1, endPrice = price2,
-      diff = None, typeOfTransaction = TypeOfTransaction(currentAdj.typeOfExecution))
+      diff = Flow(currentAdj.executedVolume.value * (price2.value - price1.value)), typeOfTransaction = TypeOfTransaction(currentAdj.typeOfExecution), complete = false)
   }
 
   private def createAllTransactions(preExistingOrderList: mutable.PriorityQueue[GenCsvOrderRowScottrade], queueOrders: mutable.PriorityQueue[GenCsvOrderRowScottrade], queueTransactions: mutable.Queue[TransactionRow]): List[TransactionRow]  = {

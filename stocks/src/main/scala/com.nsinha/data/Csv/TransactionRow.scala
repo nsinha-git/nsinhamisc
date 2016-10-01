@@ -10,5 +10,5 @@ import com.nsinha.data.TypeOfTransaction
   * Transaction will be on longest duration stocks held or shorted.
   *
   */
-case class TransactionRow(symbol: String, dateTime: Long, volume: Volume, initPrice: Price, endPrice: Price, diff: Option[Flow], typeOfTransaction: TypeOfTransaction)
+case class TransactionRow(symbol: String, dateTime: Long, volume: Volume, initPrice: Price, endPrice: Price, diff: Flow, typeOfTransaction: TypeOfTransaction, complete: Boolean)
 
