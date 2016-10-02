@@ -19,7 +19,7 @@ class CsvQuoteScottradeProjectImpl(modelFilePath: String, csvFilePath: String, c
   var startDateTime: DateTime = null
   var endDateTime: DateTime = null
   val csvModel = readModelMap(modelFile)
-  val rows: List[GenCsvQuoteRowScottrade]  = readCsv(csvFile, csvModel, classzz)
+  val rows: List[GenCsvQuoteRowScottrade]  = readSingleDayGroupedQuotesCsv(csvFile, csvModel, classzz)
 
   def readModelMap(file: File): CsvModel = {
     val s: Source = Source.fromFile(file)
@@ -38,7 +38,7 @@ class CsvQuoteScottradeProjectImpl(modelFilePath: String, csvFilePath: String, c
     CsvModel(map)
   }
 
-  override def getDates(file: File): List[DateTime] = {
+  override def getQuotesDatesFromFile(file: File): List[DateTime] = {
     val re = ".*datestart(.*)dateend".r
 
     val matches = re.findAllMatchIn(file.getName())
@@ -52,19 +52,19 @@ class CsvQuoteScottradeProjectImpl(modelFilePath: String, csvFilePath: String, c
     DateTimeUtils.sort(dates)
   }
 
-  override def getQuote(symbol: String, `type`: String): Price = {
+  override def getQuoteForToday(symbol: String, `type`: String): Price = {
     {rows filter (r => r.symbol == symbol)}.head.endprice
   }
 
   def parseDate(file:File) = {
-    val dates = getDates(file)
+    val dates = getQuotesDatesFromFile(file)
     val currentDateTime = dates.head
     startDateTime = DateTimeUtils.toStartBusinessHourOfDay(currentDateTime)
     endDateTime = DateTimeUtils.toEndBusinessHourOfDay(currentDateTime)
   }
 
 
-  override def readCsv(file: File, csvModel: CsvModel, classzz: Class[_]): List[GenCsvQuoteRowScottrade] = {
+  override def readSingleDayGroupedQuotesCsv(file: File, csvModel: CsvModel, classzz: Class[_]): List[GenCsvQuoteRowScottrade] = {
     val source = Source.fromFile(file, "UTF-8")
     val prefix = file.getName().split("\\.")(0)
     parseDate(file)
@@ -103,30 +103,30 @@ class CsvQuoteScottradeProjectImpl(modelFilePath: String, csvFilePath: String, c
     }
   }
 
-  override def writeTopVolume(i: Int): List[GenCsvQuoteRowScottrade] = {
+  override def writeTopVolumesForToday(i: Int): List[GenCsvQuoteRowScottrade] = {
     implicit val format = DefaultFormats
     rows.sortWith(GenCsvQuoteRowScottrade.sort("volume", true) )
     rows.take(i)
   }
 
-  override def writeTopGainers(i: Int): List[GenCsvQuoteRowScottrade] = {
+  override def writeTopGainersForToday(i: Int): List[GenCsvQuoteRowScottrade] = {
     implicit val format = DefaultFormats
     rows.sortWith(GenCsvQuoteRowScottrade.sort("percent", true) )
     rows.take(i)
   }
-  override def writeTopLoosers(i: Int): List[GenCsvQuoteRowScottrade] = {
+  override def writeTopLoosersForToday(i: Int): List[GenCsvQuoteRowScottrade] = {
     implicit val format = DefaultFormats
     rows.sortWith(GenCsvQuoteRowScottrade.sort("percent", false) )
     rows.take(i)
   }
 
-  override def writeTopFlowers(i: Int): List[GenCsvQuoteRowScottrade] = {
+  override def writeTopFlowersForToday(i: Int): List[GenCsvQuoteRowScottrade] = {
     implicit val format = DefaultFormats
     rows.sortWith(GenCsvQuoteRowScottrade.sort("flow", true) )
     rows.take(i)
   }
 
-  override def extractWatchers (file: File): List[GenCsvQuoteRowScottrade]= {
+  override def extractWatchersForToday(file: File): List[GenCsvQuoteRowScottrade]= {
     implicit val format = DefaultFormats
     val src = Source.fromFile(file)
     val allLines = src.getLines()

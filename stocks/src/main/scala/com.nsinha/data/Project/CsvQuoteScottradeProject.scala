@@ -7,14 +7,14 @@ import org.joda.time.DateTime
 
 trait CsvQuoteScottradeProject extends Project {
   def readModelMap(file: File): CsvModel
-  def readCsv(file: File, csvModel: CsvModel, classzz: Class[_]): List[CsvQuoteRow]
-  def getDates(file: File): List[DateTime]
-  def getQuote(symbol: String, `type`: String): Price
-  def writeTopVolume(i: Int): List[CsvQuoteRow]
-  def writeTopGainers(i: Int): List[CsvQuoteRow]
-  def writeTopLoosers(i: Int): List[CsvQuoteRow]
-  def writeTopFlowers(i: Int): List[CsvQuoteRow]
-  def extractWatchers(file: File): List[CsvQuoteRow]
+  def readSingleDayGroupedQuotesCsv(file: File, csvModel: CsvModel, classzz: Class[_]): List[CsvQuoteRow]
+  def getQuotesDatesFromFile(file: File): List[DateTime]
+  def getQuoteForToday(symbol: String, `type`: String): Price
+  def writeTopVolumesForToday(i: Int): List[CsvQuoteRow]
+  def writeTopGainersForToday(i: Int): List[CsvQuoteRow]
+  def writeTopLoosersForToday(i: Int): List[CsvQuoteRow]
+  def writeTopFlowersForToday(i: Int): List[CsvQuoteRow]
+  def extractWatchersForToday(file: File): List[CsvQuoteRow]
   def appendToAggregateAnalysisFile[A >: CsvQuoteRow](file: File, csvRows: List[A]): Unit
   def appendDataToYearFile(metaDataYearFile: String,  yearFile: String): Unit
 }

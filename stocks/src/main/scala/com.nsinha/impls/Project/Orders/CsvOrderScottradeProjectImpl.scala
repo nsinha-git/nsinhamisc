@@ -25,6 +25,7 @@ class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String, 
   val rows: List[GenCsvOrderRowScottrade] = readCsv(dumpFile, csvModel)
   val transactions: Map[String, List[TransactionRow]]= createTransactions
   val unfinishedTransactions: Map[String, List[TransactionRow]]= createUnfinishedTransactions(transactions)
+  val groupUnfinishedTransactionOnKey: Map[String, TransactionRow] = groupTransactions(unfinishedTransactions)
 
 
   override def readModelMap(file: File): CsvModel = {
@@ -104,6 +105,13 @@ class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String, 
     fw.close()
   }
 
+  override def dumpPerformanceCurrentHoldsGroupedOnSymbol(file: String) = {
+    implicit val format = DefaultFormats
+    val fw = new FileWriter(file)
+    fw.write(writePretty(groupUnfinishedTransactionOnKey))
+    fw.close()
+  }
+
   private def createUnfinishedTransactions(trans: Map[String, List[TransactionRow]]): Map[String, List[TransactionRow]] = {
     //all those transactions that  have unfinished trans
     val unfinishedTrans = findUnfinishedTrans(trans)
@@ -145,7 +153,7 @@ class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String, 
 
   private def createTransaction(currentAdj: GenCsvOrderRowScottrade): TransactionRow = {
     val price1 = currentAdj.executionPrice
-    val price2 = quoteScottradeProject.getQuote(currentAdj.symbol,"end")
+    val price2 = quoteScottradeProject.getQuoteForToday(currentAdj.symbol,"end")
     TransactionRow(symbol = currentAdj.symbol, dateTime = currentAdj.datetime,
       volume = currentAdj.executedVolume, initPrice = price1, endPrice = price2,
       diff = Flow(currentAdj.executedVolume.value * (price2.value - price1.value)), typeOfTransaction = TypeOfTransaction(currentAdj.typeOfExecution), complete = false)
@@ -221,5 +229,33 @@ class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String, 
     val priorityQueue = mutable.PriorityQueue[GenCsvOrderRowScottrade]()(GenCsvOrderRowScottrade.ordering())
     list map ( l => priorityQueue.enqueue(l))
     priorityQueue
+  }
+
+
+  def groupTransactions(unfinishedTransactions: Map[String, List[TransactionRow]]): Map[String, TransactionRow] = {
+    unfinishedTransactions map { entry =>
+      val key = entry._1
+      val toGroupList = entry._2
+      var singleTransaction: TransactionRow = null
+
+      val groupedTransaction = toGroupList.foldLeft(singleTransaction){
+        (combineT, curT) =>
+          val x = if (combineT != null) {
+            val newVolume = (combineT.volume.value + curT.volume.value)
+            val newInitPrice = (combineT.initPrice.value * combineT.volume.value +
+              curT.initPrice.value * curT.volume.value)/newVolume
+            combineT.copy(volume = Volume(newVolume), initPrice = Price(newInitPrice), endPrice = curT.endPrice)
+          } else {
+            curT
+          }
+          x
+      }
+      key -> recalculateDiff(groupedTransaction)
+    }
+  }
+
+  private def recalculateDiff(trans: TransactionRow): TransactionRow = {
+    val diff = Flow((trans.endPrice.value - trans.initPrice.value) * trans.volume.value)
+    trans.copy(diff = diff)
   }
 }

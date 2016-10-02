@@ -12,4 +12,5 @@ trait CsvOrderScottradeProject extends  Project {
   def dumpPerformance(file: String)
   def dumpPerformanceMostRecentFirst(file: String)
   def dumpPerformanceCurrentHolds(file: String)
+  def dumpPerformanceCurrentHoldsGroupedOnSymbol(file: String)
 }
