@@ -4,7 +4,7 @@ import java.io.{File, FileWriter}
 
 import com.nsinha.data.Csv._
 import com.nsinha.data.Csv.generated.GenCsvOrderRowScottrade
-import com.nsinha.data.Project.{CsvOrderScottradeProject, CsvQuoteScottradeProject}
+import com.nsinha.data.Project.{CsvOrderScottradeProject, CsvDailyQuotesScottradeProject}
 import com.nsinha.data.TypeOfTransaction
 import com.nsinha.utils.{DateTimeUtils, Loggable}
 import org.json4s.DefaultFormats
@@ -17,7 +17,7 @@ import scala.io.Source
   * class GenCsvOrderRowScottrade (datetime: Long, symbol: String, executionPrice: Price, executedVolume: Volume,  typeOfExecution: Execution) extends  CsvOrderRow
   * Created by nishchaysinha on 9/26/16.
   */
-class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String, quoteScottradeProject: CsvQuoteScottradeProject) extends CsvOrderScottradeProject with Loggable {
+class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String, quoteScottradeProject: CsvDailyQuotesScottradeProject) extends CsvOrderScottradeProject with Loggable {
 
   val modelFile = new File(modelFilePath)
   val dumpFile = new File(dumpFilePath)
