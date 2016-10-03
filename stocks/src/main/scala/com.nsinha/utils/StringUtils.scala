@@ -15,4 +15,12 @@ object StringUtils {
     }
   }
 
+  def extractPrintable(s: String): String = {
+    val res = new StringBuilder
+    for (c <- s){
+      if(c.toInt >= 32 && c.toInt<127) res.+(c)
+    }
+    res.toString()
+  }
+
 }

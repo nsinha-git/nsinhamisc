@@ -4,7 +4,7 @@ import java.io.{File, FileWriter}
 
 import com.nsinha.data.Csv._
 import com.nsinha.data.Project.CsvDailyQuotesScottradeProject
-import com.nsinha.utils.{DateTimeUtils, Loggable}
+import com.nsinha.utils.{DateTimeUtils, Loggable, StringUtils}
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 import org.joda.time.DateTime
 import org.json4s.DefaultFormats
@@ -73,18 +73,12 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, csvFilePath: Str
     var cols: Map[String, Int] = null
     var result: List[GenCsvQuoteRowScottrade] = List()
     for (line <- source.getLines()) {
-      start match {
-        case false => if (line.length > 1) {
-          cols = createColsList(line, csvModel, prefix)
-        }
-        case true =>
-          val rowCols: Map[String, String] =  extractRowCols(line, cols)
+      if(cols == null ||  cols == Nil) {
+        cols = createColsList(StringUtils.extractPrintable(line), csvModel, prefix)
+      } else {
+          val rowCols: Map[String, String] =  extractRowCols(line.replaceAll("\\p{Cntrl}", ""), cols)
           result = result.+:(mapToCsvRow(rowCols, prefix))
       }
-      if (cols != null){
-        start = true
-      }
-      i = i + 1
     }
     result
   }

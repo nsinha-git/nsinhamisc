@@ -1,14 +1,18 @@
 package com.nsinha.impls.Project
 
-import java.io.{File, FileWriter}
+import java.io.{File, FileInputStream, FileWriter}
 
+import com.nsinha.data.Csv.Price
 import com.nsinha.impls.Project.JsonCsvProject.JsonCsvProjectImpl
 import com.nsinha.impls.Project.Orders.CsvOrderScottradeProjectImpl
 import com.nsinha.impls.Project.Quotes.CsvDailyQuotesScottradeProjectImpl
-import com.nsinha.utils.Loggable
+import com.nsinha.impls.Project.YearlyQuoteAnalysisProject.YearlyQuoteAnalysisProjectImpl
+import com.nsinha.utils.{Loggable, StringUtils}
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 import org.scalatest.{FunSuite, ShouldMatchers}
 import scaldi.Injectable
+
+import scala.io.Source
 
 class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with Loggable {
 
@@ -27,11 +31,18 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
     orderImpl.dumpPerformanceCurrentHoldsGroupedOnSymbol("/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/testCombine")
   }
 
+  test("testYearlyTS"){
+    val analysisProject = new YearlyQuoteAnalysisProjectImpl("/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/2016-aggregate-data.txt")
+    val str = analysisProject.createTimeSeries[Price](axisString = "endprice", canBuildT =  new Price(0))
+    println(str)
+
+  }
+
   test("csvtest1") {
     val jsonFileName = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/test"
     val jsonCsv = new JsonCsvProjectImpl(modelFile = "" , jsonFile = jsonFileName, csvFile = "")
     val str = jsonCsv.changeAJsonToCsv()
-    val fw= new FileWriter(jsonFileName + ".csv")
+    val fw = new FileWriter(jsonFileName + ".csv")
     println(str)
     fw.write(str)
     fw.close()
@@ -46,4 +57,22 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
     fw.write(str)
     fw.close()
   }
+
+
+  test("init test for reading csv files") {
+    val fileIo = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/file_datestart05302016T16:00:00Zdateend.csv"
+    //val fileIo = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/test.csv"
+    val source = Source.fromFile(fileIo, "UTF-8")
+    for (line <- source.getLines()) {
+      val newline = line.replaceAll("\\p{Cntrl}", "?").replaceAll("\\p{Space}", "")
+
+      val x = newline.split(",")
+      for (y<-x) {
+        val z =StringUtils.extractPrintable(y)
+        println(s"$z ${z == "Symbol"}")
+      }
+    }
+  }
+
+
 }

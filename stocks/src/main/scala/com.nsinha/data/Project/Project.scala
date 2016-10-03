@@ -11,7 +11,7 @@ trait Project {
     val splitsAtColon = line.split("\"")
     var ll: String = ""
     for (i <- Range(0,splitsAtColon.length)) {
-      val x =i%2 match {
+      val x = i%2 match {
         case 1 => splitsAtColon(i).replaceAll(",","")
         case  _ => splitsAtColon(i)
       }

@@ -17,8 +17,14 @@ object Volume{
   }
 
 }
-case class Volume(value: Double) extends Ordered[Volume] {
-   def compare(other: Volume): Int = {
+case class Volume(value: Double) extends ValueObject with Ordered[Volume] {
+  override def create : ValueObject = Volume(0)
+  override def getValue(): Double = value
+  override def setValue (x: String): Volume = {
+    Volume(x)
+  }
+
+  def compare(other: Volume): Int = {
     if (value < other.value) {
       -1
     } else if ( value == other.value) {
@@ -27,6 +33,4 @@ case class Volume(value: Double) extends Ordered[Volume] {
       1
     }
   }
-
-
 }

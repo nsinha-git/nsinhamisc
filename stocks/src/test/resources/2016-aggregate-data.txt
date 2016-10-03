@@ -1,4 +1,31 @@
 [
+    {
+    "datetimeStart":165253297255000000,
+    "datetimeEnd":165253297278400000,
+    "symbol":"CORE",
+    "prevprice":{
+      "value":45.11
+    },
+    "endprice":{
+      "value":36.72
+    },
+    "startprice":{
+      "value":44.15
+    },
+    "highprice":{
+      "value":44.15
+    },
+    "lowprice":{
+      "value":37.16
+    },
+    "volume":{
+      "value":3083014.0
+    },
+    "companyname":"CORE MARK HOLDING COMPANY INCORPORATED",
+    "percentagechange":{
+      "value":14.17
+    }
+  },
   {
     "datetimeStart":167253297255000000,
     "datetimeEnd":167253297278400000,
