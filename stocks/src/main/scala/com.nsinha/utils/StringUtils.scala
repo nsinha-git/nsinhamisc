@@ -23,4 +23,8 @@ object StringUtils {
     res.toString()
   }
 
+  def countThisCharInString(s: String, c: Char): Int = {
+    s.foldLeft(0)((Z,x) => if (x == c) Z+1 else Z )
+  }
+
 }

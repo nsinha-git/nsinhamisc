@@ -12,6 +12,8 @@ import com.nsinha.data.Csv.generated.GenCsvOrderRowScottrade
 
 import scala.collection.convert.WrapAsScala._
 import scala.collection.mutable
+import org.json4s.DefaultFormats
+import org.json4s.native.Serialization.writePretty
 /**
   * Created by nishchaysinha on 10/2/16.
   */
@@ -39,6 +41,7 @@ class YearlyQuoteAnalysisProjectImpl(file: String) extends YearlyQuoteAnalysisPr
 
   val dateAxis = "datetimeStart"
   override def createTimeSeries [T <: ValueObject](key: String = "symbol", axisString: String, canBuildT: T): String = {
+    implicit val format = DefaultFormats
     val jsonObject = mapper.readTree(new File(file))
 
     assert(jsonObject.getNodeType == JsonNodeType.ARRAY)
@@ -62,7 +65,7 @@ class YearlyQuoteAnalysisProjectImpl(file: String) extends YearlyQuoteAnalysisPr
       val list = transformIntoPriorityQ(x._2) map { y => y.axis}
       sym -> list
     }
-    mapOfKeyToTimeSeriesAxis.toString()
+    writePretty(mapOfKeyToTimeSeriesAxis)
   }
 
   private def transformIntoPriorityQ(list :List[DateAndAxis]): List[DateAndAxis] = {

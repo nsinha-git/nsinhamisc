@@ -8,7 +8,6 @@ import org.joda.time.DateTime
 trait CsvDailyQuotesScottradeProject extends Project {
   def readModelMap(file: File): CsvModel
   def readSingleDayGroupedQuotesCsv(file: File, csvModel: CsvModel, classzz: Class[_]): List[CsvQuoteRow]
-  def getQuotesDatesFromFile(file: File): List[DateTime]
   def getQuoteForToday(symbol: String, `type`: String): Price
   def writeTopVolumesForToday(i: Int): List[CsvQuoteRow]
   def writeTopGainersForToday(i: Int): List[CsvQuoteRow]

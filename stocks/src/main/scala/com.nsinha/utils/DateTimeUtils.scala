@@ -1,5 +1,6 @@
 package com.nsinha.utils
 
+import java.io.File
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
 
@@ -63,5 +64,27 @@ object DateTimeUtils extends Loggable {
     val dt = new DateTime(dateTime.getTime)
     logger.debug(s"datetime = $date $time o/p=$dateTime ${dt.getMillis}")
     dt
+  }
+
+  def getQuotesDatesFromFile(file: File): List[DateTime] = {
+    val re = ".*datestart(.*)dateend".r
+
+    val matches = re.findAllMatchIn(file.getName())
+
+    val dates: List[DateTime] = matches map { x =>
+      val time = x.group(1)
+      val dateTime: DateTime = DateTime.parse(time)
+      dateTime
+    } toList
+
+    DateTimeUtils.sort(dates)
+  }
+
+  def parseDate(file:File): (DateTime, DateTime) = {
+    val dates = DateTimeUtils.getQuotesDatesFromFile(file)
+    val currentDateTime = dates.head
+    val startDateTime = DateTimeUtils.toStartBusinessHourOfDay(currentDateTime)
+    val endDateTime = DateTimeUtils.toEndBusinessHourOfDay(currentDateTime)
+    startDateTime ->endDateTime
   }
 }

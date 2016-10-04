@@ -1,10 +1,11 @@
 package com.nsinha.impls.Project.Quotes
 
 import java.io.{File, FileWriter}
+import java.nio.file.{FileSystem, FileSystems}
 
 import com.nsinha.data.Csv._
 import com.nsinha.data.Project.CsvDailyQuotesScottradeProject
-import com.nsinha.utils.{DateTimeUtils, Loggable, StringUtils}
+import com.nsinha.utils.{DateTimeUtils, FileUtils, Loggable, StringUtils}
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 import org.joda.time.DateTime
 import org.json4s.DefaultFormats
@@ -38,36 +39,16 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, csvFilePath: Str
     CsvModel(map)
   }
 
-  override def getQuotesDatesFromFile(file: File): List[DateTime] = {
-    val re = ".*datestart(.*)dateend".r
-
-    val matches = re.findAllMatchIn(file.getName())
-
-    val dates: List[DateTime] = matches map { x =>
-      val time = x.group(1)
-      val dateTime: DateTime = DateTime.parse(time)
-      dateTime
-    } toList
-
-    DateTimeUtils.sort(dates)
-  }
-
   override def getQuoteForToday(symbol: String, `type`: String): Price = {
     {rows filter (r => r.symbol == symbol)}.head.endprice
   }
 
-  def parseDate(file:File) = {
-    val dates = getQuotesDatesFromFile(file)
-    val currentDateTime = dates.head
-    startDateTime = DateTimeUtils.toStartBusinessHourOfDay(currentDateTime)
-    endDateTime = DateTimeUtils.toEndBusinessHourOfDay(currentDateTime)
-  }
-
-
   override def readSingleDayGroupedQuotesCsv(file: File, csvModel: CsvModel, classzz: Class[_]): List[GenCsvQuoteRowScottrade] = {
-    val source = Source.fromFile(file, "UTF-8")
+    val source = FileUtils.openACsvFile(file)
     val prefix = file.getName().split("\\.")(0)
-    parseDate(file)
+    val (startDateTime_, endDateTime_) = DateTimeUtils.parseDate(file)
+    startDateTime = startDateTime_
+    endDateTime = endDateTime_
     var i = 0
     var start = false
     var cols: Map[String, Int] = null
@@ -84,7 +65,7 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, csvFilePath: Str
   }
 
   override def appendDataToYearFile(metaDataYearFile: String,  yearFile: String): Unit = {
-    val source = Source.fromFile(metaDataYearFile, "UTF-8")
+    val source = FileUtils.openOrCreateFile(metaDataYearFile)
     var seen = false
     for (line <- source.getLines()) {
       if(line.contains(s"${startDateTime.getMillis},${endDateTime.getMillis}")) { seen = true}
@@ -108,6 +89,7 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, csvFilePath: Str
     rows.sortWith(GenCsvQuoteRowScottrade.sort("percent", true) )
     rows.take(i)
   }
+
   override def writeTopLoosersForToday(i: Int): List[GenCsvQuoteRowScottrade] = {
     implicit val format = DefaultFormats
     rows.sortWith(GenCsvQuoteRowScottrade.sort("percent", false) )
@@ -122,7 +104,7 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, csvFilePath: Str
 
   override def extractWatchersForToday(file: File): List[GenCsvQuoteRowScottrade]= {
     implicit val format = DefaultFormats
-    val src = Source.fromFile(file)
+    val src: Source = FileUtils.openOrCreateFile(file)
     val allLines = src.getLines()
     var watchers: Seq[String] = Seq()
     for (line <- allLines){
@@ -146,11 +128,10 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, csvFilePath: Str
     fileWriter.close()
   }
 
- def mapToCsvRow(rowCols: Map[String,String], prefix: String): GenCsvQuoteRowScottrade = {
+  def mapToCsvRow(rowCols: Map[String,String], prefix: String): GenCsvQuoteRowScottrade = {
    GenCsvQuoteRowScottrade(startDateTime.getMillis, endDateTime.getMillis, symbol = rowCols("symbol"), prevprice = Price(rowCols("prevclose")), endprice = Price(rowCols("endprice")),
      startprice = Price(rowCols("startprice")), highprice = Price(rowCols("highprice")), lowprice = Price(rowCols("lowprice")),
      volume = Volume(rowCols("volume")), companyname = rowCols("companyname"), percentagechange = Percent(rowCols("percentchange"))
    )
  }
-
 }
