@@ -14,7 +14,7 @@ trait CsvDailyQuotesScottradeProject extends Project {
   def writeTopLoosersForToday(i: Int): List[CsvQuoteRow]
   def writeTopFlowersForToday(i: Int): List[CsvQuoteRow]
   def extractWatchersForToday(file: File): List[CsvQuoteRow]
-  def appendToAggregateAnalysisFile[A >: CsvQuoteRow](file: File, csvRows: List[A]): Unit
+  def appendToAggregateAnalysisFile[A >: CsvQuoteRow](file: String, csvRows: List[A]): Unit
   def appendDataToYearFile(metaDataYearFile: String,  yearFile: String): Unit
 }
 

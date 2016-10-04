@@ -4,7 +4,7 @@ import java.io.File
 import java.nio.file.{FileSystems, Files, Path, StandardCopyOption}
 
 import com.nsinha.impls.Project.Quotes.CsvDailyQuotesScottradeProjectImpl
-import com.nsinha.utils.{DateTimeUtils, Loggable, StringUtils}
+import com.nsinha.utils.{DateTimeUtils, FileUtils, Loggable, StringUtils}
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 import org.joda.time.DateTime
 
@@ -40,17 +40,14 @@ object ConsumeAllQuotes {
     newFileName
   }
 
-
-
-
   def main(args: Array[String]) {
   }
-
 }
-class ConsumeAllQuotes (processDir: String, desDirIn: String = "") extends Loggable {
 
+
+class ConsumeAllQuotes (processDir: String, desDirIn: String = "") extends Loggable {
   def consumeTheWholeDirectoryAndMoveToProcessed: Unit = {
-    val destDir = if (desDirIn == "") processDir + "/processed"
+    val destDir = if (desDirIn == "") processDir + "/processed" else desDirIn
     moveAllFilesToCorrectNameFormat
     val processDirFile = new File(processDir)
     val path = processDirFile.getAbsolutePath
@@ -65,6 +62,7 @@ class ConsumeAllQuotes (processDir: String, desDirIn: String = "") extends Logga
         val (_, dateTime) = DateTimeUtils.parseDate(new File(fileName))
         val year = dateTime.getYear
         quoteImpl.appendDataToYearFile(path + "/output/yearly/" + year + "/metaCombinedData.json", path + "/output/yearly/" + year + "/combinedData.json")
+        FileUtils.moveFileToDestDir(fileName, destDir)
       }
     }
   }
@@ -79,13 +77,9 @@ class ConsumeAllQuotes (processDir: String, desDirIn: String = "") extends Logga
       } else {
         val newfilename = if (cur.contains("datestart")) cur else ConsumeAllQuotes.renameAStringToHaveDateFormat(cur)
         if (newfilename != cur) {
-          val source: Path = FileSystems.getDefault().getPath(path, cur)
-          val target: Path = FileSystems.getDefault().getPath(path, newfilename)
-          Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+          FileUtils.moveFile(path + "/" + cur, path + "/" + newfilename)
         }
-
       }
-
     }
   }
 }

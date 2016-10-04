@@ -5,7 +5,7 @@ import java.nio.file.{FileSystem, FileSystems}
 
 import com.nsinha.data.Csv._
 import com.nsinha.data.Project.CsvDailyQuotesScottradeProject
-import com.nsinha.utils.{DateTimeUtils, FileUtils, Loggable, StringUtils}
+import com.nsinha.utils._
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 import org.joda.time.DateTime
 import org.json4s.DefaultFormats
@@ -61,6 +61,7 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, csvFilePath: Str
           result = result.+:(mapToCsvRow(rowCols, prefix))
       }
     }
+    source.close()
     result
   }
 
@@ -70,10 +71,12 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, csvFilePath: Str
     for (line <- source.getLines()) {
       if(line.contains(s"${startDateTime.getMillis},${endDateTime.getMillis}")) { seen = true}
     }
+    source.close()
     if (seen == false) {
-      appendToAggregateAnalysisFile(new File(yearFile), rows)
-      val fw = new FileWriter(metaDataYearFile)
+      appendToAggregateAnalysisFile(yearFile, rows)
+      val fw = new FileWriter(metaDataYearFile,true)
       fw.append(s"${startDateTime.getMillis},${endDateTime.getMillis}")
+      fw.flush()
       fw.close
     }
   }
@@ -107,6 +110,7 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, csvFilePath: Str
     val src: Source = FileUtils.openOrCreateFile(file)
     val allLines = src.getLines()
     var watchers: Seq[String] = Seq()
+    src.close()
     for (line <- allLines){
       watchers = watchers.+:(line)
     }
@@ -120,12 +124,10 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, csvFilePath: Str
     watchedRows
   }
 
-  override def appendToAggregateAnalysisFile[A >: CsvQuoteRow](file: File, csvrows: List[A]): Unit = {
+  override def appendToAggregateAnalysisFile[A >: CsvQuoteRow](fileName: String, csvrows: List[A]): Unit = {
     implicit val format = DefaultFormats
     val json = writePretty(csvrows)
-    val fileWriter = new FileWriter(file)
-    fileWriter.append(json)
-    fileWriter.close()
+    JsonUtils.appendToAJsonFile(fileName, json)
   }
 
   def mapToCsvRow(rowCols: Map[String,String], prefix: String): GenCsvQuoteRowScottrade = {
