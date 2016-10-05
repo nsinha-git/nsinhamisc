@@ -1,6 +1,6 @@
 package com.nsinha.utils
 
-import java.io.File
+import java.io.{File, FileWriter}
 import java.nio.file.{FileSystems, Files, Path, StandardCopyOption}
 
 import scala.io.Source
@@ -71,5 +71,13 @@ object FileUtils {
     val target: Path = FileSystems.getDefault().getPath(getParentDirNameFromPath(dest), getOneDeepFileNameFromPath(dest))
     createParentDirIfNotPresent(dest)
     Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+  }
+
+  def writeFile(dest: String, toBeWritten: String) = {
+    openOrCreateFile(dest)
+    val fw = new FileWriter(dest)
+    fw.write(toBeWritten)
+    fw.flush()
+    fw.close()
   }
 }

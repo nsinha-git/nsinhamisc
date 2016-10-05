@@ -19,7 +19,7 @@ object JsonUtils {
     val curTree: JsonNode = mapper.readTree(jsonString)
     val node = if (prevTree != null && prevTree.isMissingNode == false) mergeNodes(prevTree, curTree) else curTree
     val opStr = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
-    val fw = new FileWriter(file, true)
+    val fw = new FileWriter(file)
     fw.write(opStr)
     fw.flush()
     fw.close
@@ -48,5 +48,28 @@ object JsonUtils {
         null
     }
     newNode
+  }
+
+
+  def main(args: Array[String]) {
+    val n1 = """
+      [{"name":"a" },{"name": "b"}]
+      """
+    val n2 = """
+      [{"name":"c" },{"name": "d"}]
+      """
+
+    val nExpected =
+      """
+      [{"name":"a" },{"name": "b"}, {"name":"c"},{"name":"d"}]
+      """
+    val t1: JsonNode = mapper.readTree(n1)
+    val t2: JsonNode = mapper.readTree(n2)
+
+    val t3 = mergeNodes(t1,t2)
+
+    val opStr = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(t3);
+    println(opStr)
+
   }
 }

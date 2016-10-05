@@ -9,6 +9,7 @@ import org.joda.time.DateTime
 import com.nsinha.utils.CsvUtils
 
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 /**
   * Created by nishchaysinha on 9/28/16.
@@ -22,8 +23,46 @@ class JsonCsvProjectImpl(jsonFile: String, modelFile: String, csvFile: String) e
 
   val model: Map[String, JsonNodeCsv] = parseModelFile(modelFile)
 
+  override def changeAJsonToTsCsv(): String = {
+    val fileJson = new File(jsonFile)
+    val tree = mapper.readTree(fileJson)
 
-  def changeAJsonToCsv(): String = {
+    //tree must be a object with fields equivalent to row(s)
+    assert(tree.getNodeType == JsonNodeType.OBJECT)
+
+    //var listOfCols: Set[String] = Set()
+    var csvRows = List[List[(String, String)]]()
+    var keyToList: Map[String, List[Double]] = Map()
+
+    if (tree.getNodeType == JsonNodeType.OBJECT) {
+      val fieldsOfObject: Iterator[java.util.Map.Entry[String, JsonNode]] = tree.fields() //this is keys for rows.
+
+      keyToList = fieldsOfObject map  { rowEntry: java.util.Map.Entry[String, JsonNode] =>
+        assert(rowEntry.getValue.getNodeType == JsonNodeType.ARRAY)
+        val key = rowEntry.getKey
+        val arrayOfDouble = rowEntry.getValue
+        val allRowsInThisArray : Iterator[JsonNode] = arrayOfDouble.elements()
+        val listOfDoubles = allRowsInThisArray.foldLeft(List[Double]()){ (Z, el) => Z.:+(el.asDouble()) }
+        key -> listOfDoubles
+      } toMap
+    }
+    var listOfCols: List[String] = List("symbol")
+    listOfCols = listOfCols ++  Range(0,keyToList.head._2.length) map (_.toString)
+
+
+    csvRows = keyToList.foldLeft(List[List[(String, String)]]()) { (Z, kv) =>
+      val sym = kv._1
+      val listOfDoubles = kv._2
+      var l = List[(String, String)](("symbol",sym))
+      for (elem <- listOfDoubles zip Range(0, listOfDoubles.length)) {
+        l = l.:+(elem._2.toString, elem._1.toString)
+      }
+      Z :+ l
+    }
+    CsvUtils.writeCsvHeaderAndRows(csvRows, listOfCols)
+  }
+
+  override def changeAJsonToCsv(): String = {
     val fileJson = new File(jsonFile)
     val tree = mapper.readTree(fileJson)
 

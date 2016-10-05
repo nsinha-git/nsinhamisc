@@ -6,4 +6,5 @@ package com.nsinha.data.Project
 trait JsonCsvProject extends Project {
   def changeAJsonToCsv(): String
   def changeACsvToJson(): String
+  def changeAJsonToTsCsv(): String
 }

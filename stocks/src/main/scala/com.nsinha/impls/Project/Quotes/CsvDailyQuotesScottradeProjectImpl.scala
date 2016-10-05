@@ -75,7 +75,7 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, csvFilePath: Str
     if (seen == false) {
       appendToAggregateAnalysisFile(yearFile, rows)
       val fw = new FileWriter(metaDataYearFile,true)
-      fw.append(s"${startDateTime.getMillis},${endDateTime.getMillis}")
+      fw.append(s"${startDateTime.getMillis},${endDateTime.getMillis}\n")
       fw.flush()
       fw.close
     }
@@ -131,7 +131,7 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, csvFilePath: Str
   }
 
   def mapToCsvRow(rowCols: Map[String,String], prefix: String): GenCsvQuoteRowScottrade = {
-   GenCsvQuoteRowScottrade(startDateTime.getMillis, endDateTime.getMillis, symbol = rowCols("symbol"), prevprice = Price(rowCols("prevclose")), endprice = Price(rowCols("endprice")),
+    GenCsvQuoteRowScottrade(startDateTime.getMillis, endDateTime.getMillis, symbol = rowCols("symbol"), prevprice = Price(rowCols("prevclose")), endprice = Price(rowCols("endprice")),
      startprice = Price(rowCols("startprice")), highprice = Price(rowCols("highprice")), lowprice = Price(rowCols("lowprice")),
      volume = Volume(rowCols("volume")), companyname = rowCols("companyname"), percentagechange = Percent(rowCols("percentchange"))
    )

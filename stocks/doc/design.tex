@@ -140,6 +140,7 @@ Stocks project
 	\end{tikzpicture}
 \end{frame}
 
+\subsection{Projects-1 }
 \begin{frame}
 	\begin{tikzpicture}[scale=0.71]
 		\coordinate (B1_L) at (0,0);
@@ -155,6 +156,24 @@ Stocks project
 		\drawLinkArrowVertical {B3_L}{B3_R}{B1_L}{B1_R}
 		\drawLinkArrowVertical {B3_L}{B3_R}{B2_L}{B2_R}
 		\drawLinkArrowHorizontal {B1_L}{B1_R}{B2_L}{B2_R}
+	\end{tikzpicture}
+\end{frame}
+
+\subsection{Projects-2 }
+\begin{frame}
+	\begin{tikzpicture}[scale=0.71]
+		\coordinate (B1_L) at (0,0);
+		\coordinate (B1_R) at (5,2);
+		\coordinate (B2_L) at (6,0);
+		\coordinate (B2_R) at (11,2);
+		\coordinate (B3_L) at (3,5);
+		\coordinate (B3_R) at (9,7);
+
+		\drawBox{B1_L}{B1_R}{ProjectJsonCsv}{red}{0}
+		\drawBox{B2_L}{B2_R}{ProjectYearlyQuoteScottradeCurrentPerformance}{red}{0}
+		\drawBox{B3_L}{B3_R}{Project}{blue}{0}
+		\drawLinkArrowVertical {B3_L}{B3_R}{B1_L}{B1_R}
+		\drawLinkArrowVertical {B3_L}{B3_R}{B2_L}{B2_R}
 	\end{tikzpicture}
 \end{frame}
 
@@ -225,12 +244,13 @@ Stocks project
 		\item Read a arbirary json and convert it to csv
 		\item arbitrary json will not be too arbitrary. There will be highest level arrays understood as rows.
 		\item each row object will have only key value pairs. the value can be arbitrary object whose only one value can be displayed(this will be passed as metadata key).
+		\item a DI map file for mpping fields fom json to csv should be provided and can be customized.
 	\end{itemize}
 \end{frame}
 
 \begin{frame}{Yearly Analysis Project}
 	\begin{itemize}
-		\item Read a yearly daily json file for all the stocks. We will ,to simplify matters, assume that json file is chronologicall ordered.
+		\item Read a lots of  daily json file for all the stocks. Create yearly files of it.
 		\item create a Time series  on some axis for each stock.
 	\end{itemize}
 \end{frame}

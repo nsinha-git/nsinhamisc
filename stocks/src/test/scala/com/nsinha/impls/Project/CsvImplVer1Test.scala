@@ -2,16 +2,18 @@ package com.nsinha.impls.Project
 
 import java.io.{File, FileInputStream, FileWriter}
 
-import com.nsinha.applications.currentPerformance.timeSeries.ConsumeAllQuotes
+import com.nsinha.applications.currentPerformance.timeSeries.{ClosingPriceTimeSeries, ConsumeAllQuotes}
 import com.nsinha.data.Csv.Price
 import com.nsinha.impls.Project.JsonCsvProject.JsonCsvProjectImpl
 import com.nsinha.impls.Project.Orders.CsvOrderScottradeProjectImpl
 import com.nsinha.impls.Project.Quotes.CsvDailyQuotesScottradeProjectImpl
 import com.nsinha.impls.Project.YearlyQuoteAnalysisProject.YearlyQuoteAnalysisProjectImpl
-import com.nsinha.utils.{Loggable, StringUtils}
+import com.nsinha.utils.{FileUtils, Loggable, StringUtils}
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 import org.scalatest.{FunSuite, ShouldMatchers}
 import scaldi.Injectable
+import org.json4s.DefaultFormats
+import org.json4s.native.Serialization.writePretty
 
 import scala.io.Source
 
@@ -26,7 +28,8 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
   }
 
   test("test2") {
-    val quoteImpl = new CsvDailyQuotesScottradeProjectImpl(modelFilePath = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/modelforcsv.txt", csvFilePath = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/Securities_to_Watch2016.09.30.16.13.43datestart09302016T16:00:00Zdateend.csv", classzz = GenCsvQuoteRowScottrade.getClass)
+    val csvFile = "/Users/nishchaysinha/stocksdatadir/currentPerformance/output/yearly/2016/Securities_to_Watch2016.10.05.15.50.22datestart10052016T16:00:00Zdateend.csv"
+    val quoteImpl = new CsvDailyQuotesScottradeProjectImpl(modelFilePath = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/modelforcsv.txt", csvFilePath = csvFile, classzz = GenCsvQuoteRowScottrade.getClass)
     val orderImpl = new CsvOrderScottradeProjectImpl(modelFilePath = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/modelforcsv.txt",dumpFilePath = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/CompletedOrders_datestart09272016T16:00:00Zdateend.csv", quoteImpl)
     orderImpl.dumpPerformanceCurrentHolds("/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/test")
     orderImpl.dumpPerformanceCurrentHoldsGroupedOnSymbol("/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/testCombine")
@@ -53,7 +56,7 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
     val jsonFileName = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/testCombine"
     val jsonCsv = new JsonCsvProjectImpl(modelFile = "" , jsonFile = jsonFileName, csvFile = "")
     val str = jsonCsv.changeAJsonToCsv()
-    val fw= new FileWriter(jsonFileName + ".csv")
+    val fw = new FileWriter(jsonFileName + ".csv")
     println(str)
     fw.write(str)
     fw.close()
@@ -62,5 +65,19 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
   test("process all quotes") {
       val consumeAllQuotes = new ConsumeAllQuotes("/Users/nishchaysinha/stocksdatadir/currentPerformance")
       consumeAllQuotes.consumeTheWholeDirectoryAndMoveToProcessed
+  }
+
+  test("process closing price") {
+    val clpTsClazz: ClosingPriceTimeSeries = new ClosingPriceTimeSeries("/Users/nishchaysinha/stocksdatadir/currentPerformance/output/yearly/2016/combinedData.json")
+    val ts = clpTsClazz.get
+    implicit val format = DefaultFormats
+    val jsonStr = writePretty(ts)
+    val jsonFileName = "/Users/nishchaysinha/stocksdatadir/currentPerformance/output/yearly/2016/closingprice.json"
+    FileUtils.writeFile(jsonFileName, jsonStr)
+    val jsonCsv = new JsonCsvProjectImpl(modelFile = "" , jsonFile = jsonFileName, csvFile = "")
+    val str = jsonCsv.changeAJsonToTsCsv()
+    val fw = new FileWriter(jsonFileName + ".csv")
+    fw.write(str)
+    fw.close()
   }
 }
