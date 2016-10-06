@@ -2,7 +2,7 @@ package com.nsinha.impls.Project
 
 import java.io.{File, FileInputStream, FileWriter}
 
-import com.nsinha.applications.currentPerformance.timeSeries.{ClosingPriceTimeSeries, ConsumeAllQuotes}
+import com.nsinha.impls.Project.timeSeries.{PriceNormalizedTimeSeries, ClosingPriceTimeSeries, ConsumeAllQuotes}
 import com.nsinha.data.Csv.Price
 import com.nsinha.impls.Project.JsonCsvProject.JsonCsvProjectImpl
 import com.nsinha.impls.Project.Orders.CsvOrderScottradeProjectImpl
@@ -68,11 +68,11 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
   }
 
   test("process closing price") {
-    val clpTsClazz: ClosingPriceTimeSeries = new ClosingPriceTimeSeries("/Users/nishchaysinha/stocksdatadir/currentPerformance/output/yearly/2016/combinedData.json")
-    val ts = clpTsClazz.get
+    val clpTsClazz = new PriceNormalizedTimeSeries("/Users/nishchaysinha/stocksdatadir/currentPerformance/output/yearly/2016/combinedData.json")
+    val ts = clpTsClazz.getTransformed
     implicit val format = DefaultFormats
     val jsonStr = writePretty(ts)
-    val jsonFileName = "/Users/nishchaysinha/stocksdatadir/currentPerformance/output/yearly/2016/closingprice.json"
+    val jsonFileName = "/Users/nishchaysinha/stocksdatadir/currentPerformance/output/yearly/2016/closingpricenormalized.json"
     FileUtils.writeFile(jsonFileName, jsonStr)
     val jsonCsv = new JsonCsvProjectImpl(modelFile = "" , jsonFile = jsonFileName, csvFile = "")
     val str = jsonCsv.changeAJsonToTsCsv()

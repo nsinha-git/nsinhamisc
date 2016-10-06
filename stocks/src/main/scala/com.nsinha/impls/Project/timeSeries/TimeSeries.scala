@@ -1,4 +1,4 @@
-package com.nsinha.applications.currentPerformance.timeSeries
+package com.nsinha.impls.Project.timeSeries
 
 import java.io.File
 
@@ -25,7 +25,8 @@ object TimeSeries {
 }
 
 class TimeSeries(inputJsonFileName: String, key: String = "symbol", axes: List[String] , pathToAxisValue:Map[String,List[String]] = Map(),
-                 fnOpt: Option[List[Double] => Double] = None, transformFnOpt: Option[(List[Double], (Double, Int)) => Double] = None) extends  Loggable {
+                 fnOpt: Option[List[Double] => Double] = None, transformFnOpt: Option[(List[Double], (Double, Int)) => Double] = None,
+                 filterFn: Option[(Map[String, List[Double]]) => Map[String, List[Double]]] = None) extends  Loggable {
   val inputFile = new File(inputJsonFileName)
   val mapper = new ObjectMapper()
   val timeSeries: Map[String, List[Double]] = processTimeSeries()
@@ -58,7 +59,7 @@ class TimeSeries(inputJsonFileName: String, key: String = "symbol", axes: List[S
       map1.get(symbol) match {
         case None => map1 += (symbol-> List(scalarValue))
         case Some(x) => map1.remove(symbol)
-          val newList = x.:+(scalarValue)
+          val newList = x.+:(scalarValue)
           map1 += (symbol -> newList)
       }
     }
