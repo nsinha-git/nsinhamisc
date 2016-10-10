@@ -2,20 +2,45 @@ package com.nsinha.impls.Project.timeSeries
 
 import scala.collection.mutable
 
-/**
-  * Created by nishchaysinha on 10/6/16.
-  */
+case class TimeSeriesWeighted(key: String, ts: List[Double], weight: Double)
+
+object TimeSeriesWeighted {
+  implicit def ordering(): Ordering[TimeSeriesWeighted] = {
+    new Ordering[TimeSeriesWeighted] {
+      override implicit def compare(x: TimeSeriesWeighted, y: TimeSeriesWeighted): Int = {
+        if (x.weight > y.weight) {
+          -1
+        } else if (x.weight == y.weight) {
+          0
+        } else {
+          1
+        }
+      }
+    }
+  }
+}
+
 object PriceNormalizedTimeSeries {
   def dividePriceByMaximumInRange(x: List[Double], y: (Double, Int)) : Double = {
     val max = x.max
     y._1/max
   }
 
+  def getTheWinnersPastIntervals(ts: Map[String, List[Double]], lag: Int): List[(String, List[Double])]  = {
+    val mp: mutable.Map[String, List[Double]] = mutable.Map()
+    val pq: mutable.PriorityQueue[TimeSeriesWeighted] = mutable.PriorityQueue[TimeSeriesWeighted]()(TimeSeriesWeighted.ordering())
+    for (kv <- ts) {
+      if (kv._2(0) > kv._2(lag)) {
+        val diffRate = (kv._2(0) - kv._2(lag))/kv._2(lag)
+        pq.enqueue(TimeSeriesWeighted(kv._1, kv._2, diffRate))
+      }
+    }
+    pq.dequeueAll map(x => (x.key, x.ts)) toList
+  }
+
   def filterPriceByRecentToppings(ts: Map[String, List[Double]], lag: Int = 14): Map[String, List[Double]]  = {
     val mp: mutable.Map[String, List[Double]] = mutable.Map()
-
     for (kv <- ts) {
-      print(kv._1)
       if (findRecentGoodStats(kv._2, lag)) mp +=(kv)
     }
     mp toMap
@@ -59,7 +84,6 @@ object PriceNormalizedTimeSeries {
         sum = sum  + ll._1
       }
     }
-    println( s" $max ${sum/lag}" )
     if (max >= 0.97 ||  sum >= 0.92*lag) {
       true
     } else {

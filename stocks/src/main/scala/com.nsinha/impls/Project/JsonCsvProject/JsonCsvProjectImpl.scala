@@ -28,11 +28,11 @@ class JsonCsvProjectImpl(jsonFile: String, modelFile: String, csvFile: String) e
     val tree = mapper.readTree(fileJson)
 
     //tree must be a object with fields equivalent to row(s)
-    assert(tree.getNodeType == JsonNodeType.OBJECT)
+    assert(tree.getNodeType == JsonNodeType.OBJECT|| tree.getNodeType == JsonNodeType.ARRAY)
 
     //var listOfCols: Set[String] = Set()
     var csvRows = List[List[(String, String)]]()
-    var keyToList: Map[String, List[Double]] = Map()
+    var keyToList: List[(String, List[Double])] = List()
 
     if (tree.getNodeType == JsonNodeType.OBJECT) {
       val fieldsOfObject: Iterator[java.util.Map.Entry[String, JsonNode]] = tree.fields() //this is keys for rows.
@@ -44,7 +44,18 @@ class JsonCsvProjectImpl(jsonFile: String, modelFile: String, csvFile: String) e
         val allRowsInThisArray : Iterator[JsonNode] = arrayOfDouble.elements()
         val listOfDoubles = allRowsInThisArray.foldLeft(List[Double]()){ (Z, el) => Z.:+(el.asDouble()) }
         key -> listOfDoubles
-      } toMap
+      } toList
+    } else if (tree.getNodeType == JsonNodeType.ARRAY) {
+      val objsOfArray: List[JsonNode] = tree.elements() toList //this is keys for rows.
+
+      keyToList = objsOfArray.map  { jsonNode =>
+        assert(jsonNode.getNodeType == JsonNodeType.OBJECT)
+        val key = jsonNode.fieldNames().next()
+        val arrayOfDouble = jsonNode.path(key)
+        val allRowsInThisArray : Iterator[JsonNode] = arrayOfDouble.elements()
+        val listOfDoubles = allRowsInThisArray.foldLeft(List[Double]()){ (Z, el) => Z.:+(el.asDouble()) }
+        key -> listOfDoubles
+      } toList
     }
     var listOfCols: List[String] = List("symbol")
     listOfCols = listOfCols ++  Range(0,keyToList.head._2.length) map (_.toString)
@@ -165,7 +176,7 @@ class JsonCsvProjectImpl(jsonFile: String, modelFile: String, csvFile: String) e
           case JsonNodeType.ARRAY => ???
           //we dont expect 2nd level array for now. Denormalize this
         case _ if key == "dateTime" =>
-          curRowList = curRowList.::(key -> {new DateTime(value.asText())}.toString)
+          curRowList = curRowList.::(key -> {new DateTime(value.asText().toLong)}.toString)
           case _ =>
             curRowList = curRowList.::(key -> value.asText())
         }
