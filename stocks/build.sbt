@@ -21,3 +21,24 @@ libraryDependencies ++= {
     "org.slf4j" % "slf4j-log4j12" % "1.7.13"
   )
 }
+
+resolvers += "spray" at "http://repo.spray.io/"
+
+libraryDependencies ++= {
+  val akkaV = "2.3.11"
+  val sprayV = "1.3.3"
+  Seq(
+    "io.spray"            %%  "spray-can"     % sprayV,
+    "io.spray"            %%  "spray-client"  % sprayV,
+    "io.spray"            %%  "spray-servlet" % sprayV,
+    "io.spray"            %%  "spray-routing" % sprayV,
+    "io.spray"            %%  "spray-json"    % "1.3.2",
+    "io.spray"            %%  "spray-testkit" % sprayV  % "test",
+    "com.typesafe.akka"   %%  "akka-actor"    % akkaV,
+    "com.typesafe.akka"   %%  "akka-slf4j"    % akkaV,
+    "com.typesafe.akka"   %%  "akka-testkit"  % akkaV   % "test",
+    "org.specs2"          %%  "specs2"        % "2.4.1" % "test"
+  )
+}
+
+

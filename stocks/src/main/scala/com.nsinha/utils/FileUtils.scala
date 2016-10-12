@@ -22,6 +22,12 @@ object FileUtils {
     dirname
   }
 
+  def createDirIfNotPresent(path: String) = {
+    val dirname = path
+    val dir = new File(dirname)
+    if (!dir.exists()) dir.mkdirs()
+  }
+
   def createParentDirIfNotPresent(path: String) = {
     val dirname = getParentDirNameFromPath(path)
     val dir = new File(dirname)

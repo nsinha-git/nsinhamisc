@@ -1,4 +1,4 @@
-package com.nsinha.impls.Project.timeSeries
+package com.nsinha.impls.Project.TimeSeries
 
 import scala.collection.mutable
 
@@ -6,7 +6,7 @@ import scala.collection.mutable
 /**
   * Created by nishchaysinha on 10/3/16.
   */
-class ClosingPriceTimeSeries(inFileName: String, key :String = "symbol", axes: List[String] = List("endprice"),
+class ClosingPriceTimeSeries(inFileName: String, key: String = "symbol", axes: List[String] = List("endprice"),
                              pathToAxisValue: Map[String, List[String]] = Map("endprice"-> List("value")))
   extends TimeSeries(inFileName, key,axes, pathToAxisValue, None, None) {
 

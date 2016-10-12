@@ -57,12 +57,11 @@ object DateTimeUtils extends Loggable {
 
   }
 
-  def parseDateTime(date: String, time: String, format: String = "MM/dd/yyyy hh:mm:ss a") : DateTime = {
+  def parseDateTime(date: String, time: String = "00:00:00 AM", format: String = "MM/dd/yyyy hh:mm:ss a") : DateTime = {
     val dtf = new SimpleDateFormat(format)
     val dateTime = dtf.parse(date + " " + time)
     dateTime.getTime
     val dt = new DateTime(dateTime.getTime)
-    logger.debug(s"datetime = $date $time o/p=$dateTime ${dt.getMillis}")
     dt
   }
 
@@ -86,5 +85,9 @@ object DateTimeUtils extends Loggable {
     val startDateTime = DateTimeUtils.toStartBusinessHourOfDay(currentDateTime)
     val endDateTime = DateTimeUtils.toEndBusinessHourOfDay(currentDateTime)
     startDateTime ->endDateTime
+  }
+
+  def getYearInYYYY(dateTime: DateTime): String = {
+   dateTime.getYear.toString
   }
 }

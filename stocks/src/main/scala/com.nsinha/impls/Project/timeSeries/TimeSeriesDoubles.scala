@@ -1,4 +1,4 @@
-package com.nsinha.impls.Project.timeSeries
+package com.nsinha.impls.Project.TimeSeries
 
 import java.io.File
 
