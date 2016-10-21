@@ -26,7 +26,7 @@ object TimeSeries {
 
 class TimeSeries(inputJsonFileName: String, key: String = "symbol", axes: List[String] , pathToAxisValue:Map[String,List[String]] = Map(),
                  fnOpt: Option[List[Double] => Double] = None, transformFnOpt: Option[(List[Double], (Double, Int)) => Double] = None,
-                 filterFn: Option[(Map[String, List[Double]]) => Map[String, List[Double]]] = None) extends  Loggable {
+                 filterFn: Option[(Map[String, List[Double]]) => Map[String, List[Double]]] = None, tickerToAdmit: List[String] = List()) extends  Loggable {
   val inputFile = new File(inputJsonFileName)
   val mapper = new ObjectMapper()
   val timeSeries: Map[String, List[Double]] = processTimeSeries()
@@ -43,24 +43,26 @@ class TimeSeries(inputJsonFileName: String, key: String = "symbol", axes: List[S
 
     for (elem: JsonNode <- rootNode.elements()) {
       val symbol = elem.path(key).asText()
-      val axesValues: List[Double] = axes map {axis =>
-        val pathToAxisOpt: Option[List[String]] = pathToAxisValue.get(axis)
-        pathToAxisOpt map { pathToAxis => val value = pathToAxis.foldLeft(elem.path(axis))((Z, e) =>
-          Z.path(e)
-        ).asDouble()
-          value
-        } getOrElse(elem.asDouble())
-      }
-      val scalarValue: Double = if (axesValues.length > 1) {
-        val x = fnOpt map  { fn => fn(axesValues)}
-        x.get
-      } else axesValues.head
+      if ((tickerToAdmit.length > 0 && tickerToAdmit.contains(symbol)) || (tickerToAdmit.length == 0)) {
+        val axesValues: List[Double] = axes map { axis =>
+          val pathToAxisOpt: Option[List[String]] = pathToAxisValue.get(axis)
+          pathToAxisOpt map { pathToAxis => val value = pathToAxis.foldLeft(elem.path(axis))((Z, e) =>
+            Z.path(e)
+          ).asDouble()
+            value
+          } getOrElse (elem.asDouble())
+        }
+        val scalarValue: Double = if (axesValues.length > 1) {
+          val x = fnOpt map { fn => fn(axesValues) }
+          x.get
+        } else axesValues.head
 
-      map1.get(symbol) match {
-        case None => map1 += (symbol-> List(scalarValue))
-        case Some(x) => map1.remove(symbol)
-          val newList = x.+:(scalarValue)
-          map1 += (symbol -> newList)
+        map1.get(symbol) match {
+          case None => map1 += (symbol -> List(scalarValue))
+          case Some(x) => map1.remove(symbol)
+            val newList = x.+:(scalarValue)
+            map1 += (symbol -> newList)
+        }
       }
     }
 

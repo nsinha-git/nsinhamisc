@@ -23,3 +23,8 @@ class ClosingPriceNormalizedTimeSeries(inFileName: String, key :String = "symbol
 
 
 
+class OpenPriceTimeSeries(inFileName: String, key: String = "symbol", axes: List[String] = List("startprice"),
+                             pathToAxisValue: Map[String, List[String]] = Map("startprice"-> List("value")))
+  extends TimeSeries(inFileName, key,axes, pathToAxisValue, None, None) {
+
+}

@@ -14,13 +14,17 @@ import org.json4s.native.Serialization.writePretty
 import scala.io.Source
 
 
-class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, csvFilePath: String, classzz: Class[_]) extends CsvDailyQuotesScottradeProject with Loggable {
+class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, quotesFilePathInput: String, classzz: Class[_]) extends CsvDailyQuotesScottradeProject with Loggable {
   val modelFile = new File(modelFilePath)
-  val csvFile = new File(csvFilePath)
+  val (quotesFile, quotesFilePath) = {
+    val newfileName = FileUtils.createDateFormattedFileInSameDir(quotesFilePathInput)
+    val f = new File(newfileName)
+    (f, newfileName)
+  }
   var startDateTime: DateTime = null
   var endDateTime: DateTime = null
   val csvModel = readModelMap(modelFile)
-  val rows: List[GenCsvQuoteRowScottrade]  = readSingleDayGroupedQuotesCsv(csvFile, csvModel, classzz)
+  val rows: List[GenCsvQuoteRowScottrade]  = readSingleDayGroupedQuotesCsv(quotesFile, csvModel, classzz)
 
   def readModelMap(file: File): CsvModel = {
     val s: Source = Source.fromFile(file)
@@ -131,6 +135,7 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, csvFilePath: Str
   }
 
   def mapToCsvRow(rowCols: Map[String,String], prefix: String): GenCsvQuoteRowScottrade = {
+    println(rowCols)
     GenCsvQuoteRowScottrade(startDateTime.getMillis, endDateTime.getMillis, symbol = rowCols("symbol"), prevprice = Price(rowCols("prevclose")), endprice = Price(rowCols("endprice")),
      startprice = Price(rowCols("startprice")), highprice = Price(rowCols("highprice")), lowprice = Price(rowCols("lowprice")),
      volume = Volume(rowCols("volume")), companyname = rowCols("companyname"), percentagechange = Percent(rowCols("percentchange"))

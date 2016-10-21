@@ -4,11 +4,12 @@ import java.io.{File, FileWriter}
 
 import com.nsinha.data.Csv._
 import com.nsinha.data.Csv.generated.GenCsvOrderRowScottrade
-import com.nsinha.data.Project.{CsvOrderScottradeProject, CsvDailyQuotesScottradeProject}
+import com.nsinha.data.Project.{CsvDailyQuotesScottradeProject, CsvOrderScottradeProject}
 import com.nsinha.data.TypeOfTransaction
-import com.nsinha.utils.{DateTimeUtils, Loggable}
+import com.nsinha.utils.{DateTimeUtils, FileUtils, Loggable}
 import org.json4s.DefaultFormats
 import org.json4s.native.Serialization.writePretty
+import com.nsinha.utils.StringUtils
 
 import scala.collection.mutable
 import scala.io.Source
@@ -17,12 +18,18 @@ import scala.io.Source
   * class GenCsvOrderRowScottrade (datetime: Long, symbol: String, executionPrice: Price, executedVolume: Volume,  typeOfExecution: Execution) extends  CsvOrderRow
   * Created by nishchaysinha on 9/26/16.
   */
-class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String, quoteScottradeProject: CsvDailyQuotesScottradeProject) extends CsvOrderScottradeProject with Loggable {
+class CsvOrderScottradeProjectImpl(modelFilePath: String, orderFilePathInput: String, quoteScottradeProject: CsvDailyQuotesScottradeProject) extends CsvOrderScottradeProject with Loggable {
 
   val modelFile = new File(modelFilePath)
-  val dumpFile = new File(dumpFilePath)
+
+  val (orderFile, orderFilePath) = {
+    val newfileName = FileUtils.createDateFormattedFileInSameDir(orderFilePathInput)
+    val f = new File(newfileName)
+    (f, newfileName)
+  }
+
   val csvModel = readModelMap(modelFile)
-  val rows: List[GenCsvOrderRowScottrade] = readCsv(dumpFile, csvModel)
+  val rows: List[GenCsvOrderRowScottrade] = readCsv(orderFile, csvModel)
   val transactions: Map[String, List[TransactionRow]]= createTransactions
   val unfinishedTransactions: Map[String, List[TransactionRow]]= createUnfinishedTransactions(transactions)
   val groupUnfinishedTransactionOnKey: Map[String, TransactionRow] = groupTransactions(unfinishedTransactions)
@@ -40,7 +47,7 @@ class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String, 
     CsvModel(map)
   }
   override def readCsv(file: File, csvModel: CsvModel): List[GenCsvOrderRowScottrade] = {
-    val source = Source.fromFile(file, "UTF-8")
+    val source = FileUtils.openACsvFile(file)
     var i = 0
     var start = false
     var cols: Map[String, Int] = null
@@ -48,7 +55,7 @@ class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String, 
     for (line <- source.getLines()) {
       start match {
         case false => if (line.length > 1) {
-          cols = createColsList(line, csvModel, "")
+          cols = createColsList(StringUtils.extractPrintable(line), csvModel, "")
         }
         case true =>
           val rowCols: Map[String, String] =  extractRowCols(line, cols)
@@ -152,7 +159,7 @@ class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String, 
   }
 
   private def createTransaction(currentAdj: GenCsvOrderRowScottrade): TransactionRow = {
-    val price1 = currentAdj.executionPrice
+    val price1: Price = currentAdj.executionPrice
     val price2 = quoteScottradeProject.getQuoteForToday(currentAdj.symbol,"end")
     TransactionRow(symbol = currentAdj.symbol, dateTime = currentAdj.datetime,
       volume = currentAdj.executedVolume, initPrice = price1, endPrice = price2,
@@ -222,8 +229,6 @@ class CsvOrderScottradeProjectImpl(modelFilePath: String, dumpFilePath: String, 
     queueOrders map {x => queueTransactions.enqueue(createTransaction(x))}
     queueTransactions.toList
   }
-
-
 
   private def transformIntoPriorityQ(list :List[GenCsvOrderRowScottrade]): mutable.PriorityQueue[GenCsvOrderRowScottrade] = {
     val priorityQueue = mutable.PriorityQueue[GenCsvOrderRowScottrade]()(GenCsvOrderRowScottrade.ordering())
