@@ -5,14 +5,16 @@ import java.io.{File, FileInputStream, FileWriter}
 import com.nsinha.impls.Project.TimeSeries._
 import com.nsinha.data.Csv.Price
 import com.nsinha.impls.Project.JsonCsvProject.JsonCsvProjectImpl
-import com.nsinha.impls.Project.Orders.CsvOrderScottradeProjectImpl
-import com.nsinha.impls.Project.Quotes.CsvDailyQuotesScottradeProjectImpl
+import com.nsinha.impls.Project.OrderAnalysis.OrderAnalysis
+import com.nsinha.impls.Project.OrderAnalysis.OrderAnalysis.apply
+import com.nsinha.impls.Project.QuandlOHLCDump.TimeSeriesRecordsFromYearly._
+import com.nsinha.impls.Project.Quotes.Scottrade.{ConsumeAllScottradeQuotes, CsvDailyQuotesScottradeProjectImpl}
 import com.nsinha.impls.Project.YearlyQuoteAnalysisProject.YearlyQuoteAnalysisProjectImpl
-import com.nsinha.utils.{FileUtils, Loggable, StringUtils}
+import com.nsinha.utils.{ConcatenateJsonFiles, FileUtils, Loggable, StringUtils}
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 import org.scalatest.{FunSuite, ShouldMatchers}
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.{FiniteDuration, SECONDS}
@@ -37,32 +39,9 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
   }
 
   test("orderAnalysis") {
-    val quoteFile = "/Users/nishchaysinha/Downloads/Securities_to_Watch2016.10.19.16.04.43.csv"
-    val orderFile = "/Users/nishchaysinha/Downloads/CompletedOrders2016.10.19.15.36.39.csv"
-    val quoteImpl = new CsvDailyQuotesScottradeProjectImpl(modelFilePath = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/modelforcsv.txt", quotesFilePathInput = quoteFile, classzz = GenCsvQuoteRowScottrade.getClass)
-    val orderImpl = new CsvOrderScottradeProjectImpl(modelFilePath = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/modelforcsv.txt", orderFilePathInput = orderFile, quoteImpl)
-    val currentHoldsByDate = "/Users/nishchaysinha/stocksdatadir/currentPerformance/currentHoldsByDate.json"
-    val currentHoldsBySymbol = "/Users/nishchaysinha/stocksdatadir/currentPerformance/currentHoldsBySymbol.json"
-    orderImpl.dumpPerformanceCurrentHolds(currentHoldsByDate)
-    changeToCsv(currentHoldsByDate)
-    orderImpl.dumpPerformanceCurrentHoldsGroupedOnSymbol(currentHoldsBySymbol)
-    changeToCsv(currentHoldsBySymbol)
-  }
-
-  test("testYearlyTS"){
-    val analysisProject = new YearlyQuoteAnalysisProjectImpl("/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/2016-aggregate-data.txt")
-    val str = analysisProject.createTimeSeries[Price](axisString = "endprice", canBuildT =  new Price(0))
-    logger.info(str)
-
-  }
-
-  def changeToCsv(jsonFileName: String) {
-    val jsonCsv = new JsonCsvProjectImpl(modelFile = "" , jsonFile = jsonFileName, csvFile = "")
-    val str = jsonCsv.changeAJsonToCsv()
-    val fw = new FileWriter(jsonFileName + ".csv")
-    println(str)
-    fw.write(str)
-    fw.close()
+    val quoteFile = "/Users/nishchaysinha/Downloads/Securities_to_Watch2016.11.02.10.26.39.csv"
+    val orderFile = "/Users/nishchaysinha/Downloads/CompletedOrders2016.11.02.11.20.28.csv"
+    OrderAnalysis.OrderAnalysis(quoteFile,orderFile)
   }
 
   test("csvtest2") {
@@ -75,9 +54,16 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
     fw.close()
   }
 
+  test("testYearlyTS"){
+    val analysisProject = new YearlyQuoteAnalysisProjectImpl("/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/2016-aggregate-data.txt")
+    val str = analysisProject.createTimeSeries[Price](axisString = "endprice", canBuildT =  new Price(0))
+    logger.info(str)
+  }
+
+
   test("process all quotes") {
-     val consumeAllQuotes = new ConsumeAllQuotes("/Users/nishchaysinha/stocksdatadir/currentPerformance")
-     consumeAllQuotes.consumeTheWholeDirectoryAndMoveToProcessed
+     val consumeAllQuotes = new ConsumeAllScottradeQuotes("/Users/nishchaysinha/stocksdatadir/currentPerformance")
+     consumeAllQuotes()
   }
 
   test("process closing price") {
@@ -179,96 +165,32 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
 
   test("Accumulate Quandl yearly quotes for various tickers") {
     for (year <- Range(1985,2017)) {
-      ConcatenateTickerTimeSeries.processDirectory(s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/${year}", outputfile = "combinedData.json")
+      ConcatenateJsonFiles.processDirectory(s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/${year}", outputfile = "combinedData.json")
     }
   }
 
   def `process  closing price for many years` =  {
-    for (year <- Range(1985,2017)) {
-      val jsonFileName = s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/$year/output/closingPrice.json"
-      val clpTsClazz = new ClosingPriceTimeSeries(s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/$year/output/combinedData.json")
-      val ts = clpTsClazz.getTransformed
-      implicit val format = DefaultFormats
-      val jsonStr = writePretty(ts)
-      FileUtils.writeFile(jsonFileName, jsonStr)
-      val jsonCsv = new JsonCsvProjectImpl(modelFile = "", jsonFile = jsonFileName, csvFile = "")
-      val str = jsonCsv.changeAJsonToTsCsv()
-      val fw = new FileWriter(jsonFileName + ".csv")
-      fw.write(str)
-      fw.close()
-    }
+    ClosingPriceRecords.processYears(Range(1985, 2017).toList)
   }
 
   def `process  open price for many years` =  {
-    for (year <- Range(1985,2017)) {
-      val jsonFileName = s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/$year/output/openPrice.json"
-      val clpTsClazz = new OpenPriceTimeSeries(s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/$year/output/combinedData.json")
-      val ts = clpTsClazz.getTransformed
-      implicit val format = DefaultFormats
-      val jsonStr = writePretty(ts)
-      FileUtils.writeFile(jsonFileName, jsonStr)
-      val jsonCsv = new JsonCsvProjectImpl(modelFile = "", jsonFile = jsonFileName, csvFile = "")
-      val str = jsonCsv.changeAJsonToTsCsv()
-      val fw = new FileWriter(jsonFileName + ".csv")
-      fw.write(str)
-      fw.close()
-    }
+    OpenPriceRecords.processYears(Range(1985, 2017).toList)
   }
 
   def `process  low price for many years` =  {
-    for (year <- Range(1985,2017)) {
-      val jsonFileName = s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/$year/output/lowPrice.json"
-      val clpTsClazz = new LowPriceTimeSeries(s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/$year/output/combinedData.json")
-      val ts = clpTsClazz.getTransformed
-      implicit val format = DefaultFormats
-      val jsonStr = writePretty(ts)
-      FileUtils.writeFile(jsonFileName, jsonStr)
-      val jsonCsv = new JsonCsvProjectImpl(modelFile = "", jsonFile = jsonFileName, csvFile = "")
-      val str = jsonCsv.changeAJsonToTsCsv()
-      val fw = new FileWriter(jsonFileName + ".csv")
-      fw.write(str)
-      fw.close()
-    }
+    LowPriceRecords.processYears(Range(1985, 2017).toList)
   }
 
   def `process  high price for many years` = {
-    for (year <- Range(1985,2017)) {
-      val jsonFileName = s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/$year/output/highPrice.json"
-      val clpTsClazz = new HighPriceTimeSeries(s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/$year/output/combinedData.json")
-      val ts = clpTsClazz.getTransformed
-      implicit val format = DefaultFormats
-      val jsonStr = writePretty(ts)
-      FileUtils.writeFile(jsonFileName, jsonStr)
-      val jsonCsv = new JsonCsvProjectImpl(modelFile = "", jsonFile = jsonFileName, csvFile = "")
-      val str = jsonCsv.changeAJsonToTsCsv()
-      val fw = new FileWriter(jsonFileName + ".csv")
-      fw.write(str)
-      fw.close()
-    }
+    HighPriceRecords.processYears(Range(1985, 2017).toList)
   }
 
   def `process  volume for many years` = {
-    for (year <- Range(1985, 2017)) {
-      val jsonFileName = s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/$year/output/volume.json"
-      val clpTsClazz = new VolumeTimeSeries(s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/$year/output/combinedData.json")
-      val ts = clpTsClazz.getTransformed
-      implicit val format = DefaultFormats
-      val jsonStr = writePretty(ts)
-      FileUtils.writeFile(jsonFileName, jsonStr)
-      val jsonCsv = new JsonCsvProjectImpl(modelFile = "", jsonFile = jsonFileName, csvFile = "")
-      val str = jsonCsv.changeAJsonToTsCsv()
-      val fw = new FileWriter(jsonFileName + ".csv")
-      fw.write(str)
-      fw.close()
-    }
+    VolumeRecords.processYears(Range(1985, 2017).toList)
   }
 
   test("run all ohlc into a csv file")  {
-    `process  closing price for many years`
-    `process  high price for many years`
-    `process  low price for many years`
-    `process  volume for many years`
-    `process  open price for many years`
+    YearlyRecords.processOHLCForYears(Range(1985,2017).toList)
   }
 
 }

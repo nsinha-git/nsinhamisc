@@ -170,7 +170,7 @@ Stocks project
 		\coordinate (B3_R) at (9,7);
 
 		\drawBox{B1_L}{B1_R}{ProjectJsonCsv}{red}{0}
-		\drawBox{B2_L}{B2_R}{ProjectYearlyQuoteScottradeCurrentPerformance}{red}{0}
+		\drawBox{B2_L}{B2_R}{ProjectYearlyQuoteSc}{red}{0}
 		\drawBox{B3_L}{B3_R}{Project}{blue}{0}
 		\drawLinkArrowVertical {B3_L}{B3_R}{B1_L}{B1_R}
 		\drawLinkArrowVertical {B3_L}{B3_R}{B2_L}{B2_R}
@@ -178,7 +178,21 @@ Stocks project
 \end{frame}
 
 
+\begin{frame}{ALl projects}
+    \begin{itemize}
+	\item Quotes (Scottrade) 
+    		\begin{itemize}
+			\item DailyQuotes
+				This project ingests a daily quote file from scottrade and outputs the deserialized rows in specific format. We may append this deserialized form to an aggregate file.
+			\item ConsumeAllDailyQuotes
+				This project can process a whole dir of quotes files using \textbf{DailyQuotes} and append to aggegate file.
+    		\end{itemize}
+	\item Orders (Scottrade)
+		This can ingest a order file and a daily quote file and produce the break up of losses and gains of past and present holdings. Holdings are grouped under symbols. We can split a single ticker as per their  purchase dates. 
+	\item 
 
+    \end{itemize}
+\end{frame}
 
 \begin{frame}{Daily Quote data structure}
 

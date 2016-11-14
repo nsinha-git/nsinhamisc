@@ -24,7 +24,7 @@ import DateTimeUtils._
 import scala.concurrent.duration.Duration
 
 trait QuoteForTickerFromQuandl {
-  def getHistoricalQuote(ticker: String, urlPrefix: String): Future[List[GenCsvQuoteRowScottrade]]
+  def getHistoricalQuoteForTicker(ticker: String, urlPrefix: String): Future[List[GenCsvQuoteRowScottrade]]
   def getHistoricalQuoteMap(ticker: String, url: String): Future[List[GenCsvQuoteRowScottrade]]
   def createYearlyFilesForTicker(ticker: String, dir: String, urlPrefix: String)
   def createYearlyFilesForMaps(ticker: String, dir: String, url: String)
@@ -107,7 +107,7 @@ object QuoteForTickerFromQuandl extends QuoteForTickerFromQuandl with Loggable {
     }
   }
 
-  def getHistoricalQuote(ticker: String, urlPrefix: String): Future[List[GenCsvQuoteRowScottrade]] = {
+  def getHistoricalQuoteForTicker(ticker: String, urlPrefix: String): Future[List[GenCsvQuoteRowScottrade]] = {
     val fut = getHistoricalQuoteInt(ticker, urlPrefix)
     fut  map (httpResponse =>  getHistoricalQuoteListOfRows(ticker, httpResponse))
   }
@@ -126,12 +126,10 @@ object QuoteForTickerFromQuandl extends QuoteForTickerFromQuandl with Loggable {
 
   override def createYearlyFilesForTicker(ticker: String, dir: String, urlPrefix: String) = {
     logger.info(ticker)
-    val listOfQuotesFut = getHistoricalQuote(ticker, urlPrefix)
+    val listOfQuotesFut = getHistoricalQuoteForTicker(ticker, urlPrefix)
     val l = listOfQuotesFut map (listOfQuotes => divideIntoYearlyBins(ticker, listOfQuotes)) map (x => writeYearlyFilesFromYearlyQuotes(ticker,x,dir))
     Await.result(l, Duration.Inf)
   }
-
-
 
   private def divideIntoYearlyBins(ticker: String, quotes: List[GenCsvQuoteRowScottrade]): Map[String, List[GenCsvQuoteRowScottrade]] = {
     val yearToQuotes: List[(String , GenCsvQuoteRowScottrade)] = {quotes map  { quote =>

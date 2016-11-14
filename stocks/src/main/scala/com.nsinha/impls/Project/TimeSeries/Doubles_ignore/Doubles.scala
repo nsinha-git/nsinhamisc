@@ -1,4 +1,4 @@
-package com.nsinha.impls.Project.TimeSeries
+package com.nsinha.impls.Project.TimeSeries.Doubles_ignore
 
 import scala.collection.mutable
 

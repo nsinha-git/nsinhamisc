@@ -1,22 +1,18 @@
 package com.nsinha.impls.Project.JsonCsvProject
 
-import java.io.File
-
+import java.io.{File, FileWriter}
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.nsinha.data.Project.JsonCsvProject
 import org.joda.time.DateTime
 import com.nsinha.utils.CsvUtils
-
 import scala.collection.JavaConversions._
-import scala.collection.mutable
 
 /**
   * Created by nishchaysinha on 9/28/16.
   */
 
 case class JsonNodeCsv(name: String, `type`: String = "double")
-
 
 class JsonCsvProjectImpl(jsonFile: String, modelFile: String, csvFile: String) extends JsonCsvProject {
   val mapper = new ObjectMapper
@@ -133,7 +129,7 @@ class JsonCsvProjectImpl(jsonFile: String, modelFile: String, csvFile: String) e
         //we dont expect 2nd level array for now. Denormalize this
 
         case _ if key == "dateTime" =>
-          curRowList = curRowList.::(key -> {new DateTime(value.asLong())}.toString("dd-MM-yyyy"))
+          curRowList = curRowList.::(key -> {new DateTime(value.asLong())}.toString("MM/dd/yyyy"))
         case _   =>
           curRowList = curRowList.::(key -> value.asText())
       }
@@ -176,7 +172,7 @@ class JsonCsvProjectImpl(jsonFile: String, modelFile: String, csvFile: String) e
           case JsonNodeType.ARRAY => ???
           //we dont expect 2nd level array for now. Denormalize this
         case _ if key == "dateTime" =>
-          curRowList = curRowList.::(key -> {new DateTime(value.asText().toLong)}.toString)
+          curRowList = curRowList.::(key -> {new DateTime(value.asText().toLong)}.toString("MM/dd/yyyy"))
           case _ =>
             curRowList = curRowList.::(key -> value.asText())
         }
@@ -203,5 +199,17 @@ class JsonCsvProjectImpl(jsonFile: String, modelFile: String, csvFile: String) e
       case false => Option(interestingNode.asText())
       case true => None
     }
+  }
+}
+
+
+object JsonCsvProject {
+  def convertToCsvFile(jsonFileName: String) {
+    val jsonCsv = new JsonCsvProjectImpl(modelFile = "" , jsonFile = jsonFileName, csvFile = "")
+    val str = jsonCsv.changeAJsonToCsv()
+    val fw = new FileWriter(jsonFileName + ".csv")
+    println(str)
+    fw.write(str)
+    fw.close()
   }
 }

@@ -1,19 +1,17 @@
-package com.nsinha.impls.Project.TimeSeries
+package com.nsinha.utils
 
-import java.io.{File, FileReader, FileWriter}
+import java.io.File
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.nsinha.utils.{FileUtils, JsonUtils}
 
 /**
   * Created by nishchaysinha on 10/10/16.
   */
-trait ConcatenateTickerTimeSeries {
+trait ConcatenateJsonFiles {
   def processDirectory(dir: String, outputdir: String, outputfile: String)
 }
 
-
-object ConcatenateTickerTimeSeries extends ConcatenateTickerTimeSeries {
+object ConcatenateJsonFiles extends ConcatenateJsonFiles {
   val mapper = new ObjectMapper()
   override def processDirectory(dir: String, outputdirIn: String = "", outputfile: String) = {
     val srcDir = new File(dir)
@@ -28,7 +26,6 @@ object ConcatenateTickerTimeSeries extends ConcatenateTickerTimeSeries {
       val rootNode = mapper.readTree(f)
       JsonUtils.appendToAJsonFile(destFile, mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode) )
       FileUtils.moveFile(f.getAbsolutePath, processedDir + "/" + f.getName)
-
     }
   }
 }

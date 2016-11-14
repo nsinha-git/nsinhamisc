@@ -1,5 +1,7 @@
 package com.nsinha.impls.Project.TimeSeries
 
+import com.nsinha.impls.Project.TimeSeries.Doubles_ignore.{Size2, TimeSeriesDoubles}
+
 /**
   * Created by nishchaysinha on 10/6/16.
   */

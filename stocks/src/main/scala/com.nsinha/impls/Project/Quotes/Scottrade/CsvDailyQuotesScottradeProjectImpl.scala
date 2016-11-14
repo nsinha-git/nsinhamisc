@@ -1,7 +1,6 @@
-package com.nsinha.impls.Project.Quotes
+package com.nsinha.impls.Project.Quotes.Scottrade
 
 import java.io.{File, FileWriter}
-import java.nio.file.{FileSystem, FileSystems}
 
 import com.nsinha.data.Csv._
 import com.nsinha.data.Project.CsvDailyQuotesScottradeProject
@@ -44,6 +43,8 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, quotesFilePathIn
   }
 
   override def getQuoteForToday(symbol: String, `type`: String): Price = {
+    logger.debug("Symbol:" + symbol)
+
     {rows filter (r => r.symbol == symbol)}.head.endprice
   }
 

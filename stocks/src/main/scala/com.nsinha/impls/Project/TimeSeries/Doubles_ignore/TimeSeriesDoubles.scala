@@ -1,14 +1,13 @@
-package com.nsinha.impls.Project.TimeSeries
+package com.nsinha.impls.Project.TimeSeries.Doubles_ignore
 
 import java.io.File
 
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.databind.node.JsonNodeType
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.nsinha.utils.Loggable
 
 import scala.collection.convert.WrapAsScala._
 import scala.collection.mutable
-import Doubles.Implicits._
 
 object TimeSeriesDoubles {
   def induceTransform(ts: Map[String, List[Double]], fn: (List[Double], (Double, Int)) => Double): Map[String, List[Double]] = {

@@ -1,22 +1,17 @@
-package com.nsinha.impls.Project.TimeSeries
+package com.nsinha.impls.Project.Quotes.Scottrade
 
 import java.io.File
-import java.nio.file.{FileSystems, Files, Path, StandardCopyOption}
 
-import com.nsinha.impls.Project.Quotes.CsvDailyQuotesScottradeProjectImpl
-import com.nsinha.utils.{DateTimeUtils, FileUtils, Loggable, StringUtils}
+import com.nsinha.utils.{DateTimeUtils, FileUtils, Loggable}
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
-import org.joda.time.DateTime
-
-import scala.collection.mutable
 
 /**
   * Created by nishchaysinha on 10/3/16.
   */
 
 
-class ConsumeAllQuotes (processDir: String, desDirIn: String = "") extends Loggable {
-  def consumeTheWholeDirectoryAndMoveToProcessed: Unit = {
+class ConsumeAllScottradeQuotes(processDir: String, desDirIn: String = "") extends Loggable {
+  def apply(): Unit = {
     val destDir = if (desDirIn == "") processDir + "/processed" else desDirIn
     moveAllFilesToCorrectNameFormat
     val processDirFile = new File(processDir)
