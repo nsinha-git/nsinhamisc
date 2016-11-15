@@ -34,7 +34,7 @@
 
 \title[Anomaly Detection System Overview]
 {%
-Stocks project
+JsonCsv project
 %
 }
 
@@ -114,47 +114,7 @@ Stocks project
 
 \subsection{Flow Diagram }
 
-\begin{frame}
-	\begin{tikzpicture}[scale=0.71]
-		\coordinate (B1_L) at (0,0);
-		\coordinate (B1_R) at (5,2);
-		\coordinate (B2_L) at (6,0);
-		\coordinate (B2_R) at (11,2);
-		\coordinate (B3_L) at (3,5);
-		\coordinate (B3_R) at (9,7);
-		\coordinate (B4_L) at (0,-3);
-		\coordinate (B4_R) at (5,-1);
-		\coordinate (B5_L) at (6,-3);
-		\coordinate (B5_R) at (11,-1);
-
-		\drawBox{B1_L}{B1_R}{QuoteRow}{red}{0}
-		\drawBox{B2_L}{B2_R}{OrderRow}{red}{0}
-		\drawBox{B3_L}{B3_R}{CsvRow}{blue}{0}
-		\drawBox{B4_L}{B4_R}{ScottradeDailyQuoteRow}{purple}{0}
-		\drawBox{B5_L}{B5_R}{ScottradeOrderRow}{purple}{0}
-		\drawLinkArrowVertical {B3_L}{B3_R}{B1_L}{B1_R}
-		\drawLinkArrowVertical {B3_L}{B3_R}{B2_L}{B2_R}
-		\drawLinkArrowVertical {B1_L}{B1_R}{B4_L}{B4_R}
-		\drawLinkArrowVertical {B2_L}{B2_R}{B5_L}{B5_R}
-
-	\end{tikzpicture}
-\end{frame}
-
-\subsection{Projects-1 }
-\begin{frame}
-	\begin{itemize}
-		\item JsonCsv(The most basic JSoncsv formatter)
-		\item YearlyQuotes
-		\item DailyQuote
-		\item Orders
-		\item TimeSeries
-		\item QuandlOHLCDump
-	\end{itemize}
-
-\end{frame}
-
-
-\begin{frame}{ALL projects}
+\begin{frame}{CsvProject}
     \begin{itemize}
 	\item Quotes (Scottrade) 
     		\begin{itemize}

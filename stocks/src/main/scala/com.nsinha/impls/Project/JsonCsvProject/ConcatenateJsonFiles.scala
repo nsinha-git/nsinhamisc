@@ -1,8 +1,9 @@
-package com.nsinha.utils
+package com.nsinha.impls.Project.JsonCsvProject
 
 import java.io.File
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.nsinha.utils.FileUtils
 
 /**
   * Created by nishchaysinha on 10/10/16.
@@ -22,10 +23,15 @@ object ConcatenateJsonFiles extends ConcatenateJsonFiles {
     val processedDir = (dir + "/processed")
     FileUtils.createParentDirIfNotPresent(destFile)
     FileUtils.createDirIfNotPresent(processedDir)
-    for (f <- allFilesToConcat if f.isDirectory == false) {
+    var lastTree = try { mapper.readTree(new File(destFile))} catch { case e: Exception => null}
+    for (f <- allFilesToConcat if ((f.isDirectory == false) && !f.getName.contains("last"))) {
       val rootNode = mapper.readTree(f)
-      JsonUtils.appendToAJsonFile(destFile, mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode) )
-      FileUtils.moveFile(f.getAbsolutePath, processedDir + "/" + f.getName)
+      lastTree = JsonUtils.appendToJsonNode(lastTree, mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode) )
+      //FileUtils.moveFile(f.getAbsolutePath, processedDir + "/" + f.getName)
     }
+
+    if (lastTree != null)
+      JsonUtils.writeToFile(new File(destFile), mapper.writerWithDefaultPrettyPrinter().writeValueAsString(lastTree))
+
   }
 }

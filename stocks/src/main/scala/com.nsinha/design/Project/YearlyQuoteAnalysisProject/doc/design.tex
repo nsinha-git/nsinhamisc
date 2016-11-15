@@ -1,0 +1,128 @@
+\documentclass{beamer}
+
+
+% Setup appearance:
+
+\usetheme{Darmstadt}
+\usefonttheme[onlylarge]{structurebold}
+\setbeamerfont*{frametitle}{size=\normalsize, series=\bfseries}
+\setbeamertemplate{navigation symbols}{}
+
+
+% Standard packages
+
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+
+% Setup TikZ
+
+\usepackage{ifthenx}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
+\usepackage{pgfmath}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{ulem}
+\tikzstyle{block}=[draw opacity=0.7, line width=1.4cm]
+\lstset{language=C}
+
+% Author, Title, etc.
+
+\title[Anomaly Detection System Overview]
+{%
+Yearly Quote Analysis
+%
+}
+
+\author[Sinha N]
+{
+  Nish~Sinha\inst{1} \and
+}
+
+\institute[Xad]
+{
+  \inst{1}%
+  Nsinha Inc.,  CA, USA
+  \and
+  \vskip-2mm
+}
+
+\date[\today]
+{\today}
+
+
+
+% The main document
+\newcommand{\drawBoxVertText}[5]{{0}
+		\shade[top color=#4, bottom color=#4,xslant=#5] (#1) rectangle (#2) node[midway,below][label={[rotate=-90]left:#3}] {};
+
+%node[midway][above] [label={[rotate=-90]above:#3}]{};
+}
+
+\newcommand {\drawArrowLToRAbove}[3] {
+	\draw[->, auto] let
+		\p1 = (#1), \p2 = (#2)
+		in
+		(\x1  ,\y1) -- (\x2,\y2)  
+		(\x1  ,\y1) -- (\x2,\y2)  node[midway][above] {#3};
+}
+
+\newcommand{\drawLinkArrowVertical}[4]{
+	\draw[->, auto] let
+		\p1 = (#1), \p2 = (#2),
+		\p3 = (#3), \p4 = (#4)
+		in
+		({(\x1 + \x2)*1/2} ,\y1) -- ({(\x3 + \x4)*1/2} ,\y4);
+}
+
+\newcommand{\drawLinkArrowVerticalWithOffset}[4]{
+	\draw[->, auto] let
+		\p1 = (#1), \p2 = (#2),
+		\p3 = (#3), \p4 = (#4)
+		in
+		(\x1  ,\y1) -- (\x3 ,\y4);
+}
+\newcommand{\drawLinkArrowHorizontal}[4]{
+	\draw[<->] let
+		\p1 = (#1), \p2 = (#2),
+		\p3 = (#3), \p4 = (#4)
+		in
+		(\x2, {(\y1 + \y2)*1/2}) -- (\x3, {(\y3 + \y4)*1/2});
+}
+
+\newcommand{\drawBox}[5]{{0}
+		\shade[top color=#4, bottom color=#4,xslant=#5] (#1) rectangle (#2) node[midway,below] {#3};
+}
+
+\newcommand{\drawBoxTextBottom}[7]{{0}
+		\shade[top color=#4, bottom color=#4,xslant=#5] (#1) rectangle (#2) node[left=#6in,below=#7in] {#3};
+}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+
+\section{The Design}
+
+\subsection{Flow Diagram }
+
+\begin{frame}{Yearly Analysis Project}
+	\begin{itemize}
+		\item Read a lots of  daily json file for all the stocks. Create yearly files of it.
+		\item create a Time series  on some axis for each stock.
+		\item The axis could be endprice, lowprice, volume etc
+	\end{itemize}
+\end{frame}
+
+
+
+\end{document}
+

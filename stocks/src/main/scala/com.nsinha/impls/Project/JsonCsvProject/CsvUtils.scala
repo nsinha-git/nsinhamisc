@@ -1,4 +1,6 @@
-package com.nsinha.utils
+package com.nsinha.impls.Project.JsonCsvProject
+
+import java.io.FileWriter
 
 /**
   * Created by nishchaysinha on 9/30/16.
@@ -40,5 +42,8 @@ object CsvUtils {
     val data = allCols.mkString("\n")
     header + "\n" + data
   }
+
+
+
 
 }

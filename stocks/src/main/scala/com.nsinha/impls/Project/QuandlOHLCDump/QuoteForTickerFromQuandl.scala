@@ -6,13 +6,13 @@ package com.nsinha.impls.Project.QuandlOHLCDump
 import akka.actor.ActorSystem
 import akka.io.IO
 import spray.can.Http
+
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future }
+import scala.concurrent.{Await, Future}
 import akka.pattern.ask
 import akka.util.Timeout
 import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import scala.collection.convert.WrapAsScala._
 import com.nsinha.data.Csv.{Percent, Price, Volume}
 import org.joda.time.DateTime
 import spray.http.{HttpMethods, HttpRequest, HttpResponse, Uri}
@@ -22,17 +22,27 @@ import com.nsinha.utils.{DateTimeUtils, FileUtils, Loggable}
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 import DateTimeUtils._
 import scala.concurrent.duration.Duration
+import scala.collection.convert.WrapAsScala._
 
-trait QuoteForTickerFromQuandl {
-  def getHistoricalQuoteForTicker(ticker: String, urlPrefix: String): Future[List[GenCsvQuoteRowScottrade]]
-  def getHistoricalQuoteMap(ticker: String, url: String): Future[List[GenCsvQuoteRowScottrade]]
-  def createYearlyFilesForTicker(ticker: String, dir: String, urlPrefix: String)
-  def createYearlyFilesForMaps(ticker: String, dir: String, url: String)
+
+trait QuoteForTickerFromQuandlTrait {
+  def getHistoricalQuoteForTicker(ticker: String, urlPrefix: String, latest: Long): Future[List[GenCsvQuoteRowScottrade]]
+  def getHistoricalQuoteMap(ticker: String, url: String, latest: Long): Future[List[GenCsvQuoteRowScottrade]]
+  def createYearlyFilesForTicker(ticker: String, dir: String, urlPrefix: String, latest: Long): Future[Unit]
+  def createYearlyFilesForMaps(ticker: String, dir: String, url: String, latest: Long): Future[Unit]
 }
-object QuoteForTickerFromQuandl extends QuoteForTickerFromQuandl with Loggable {
+object QuoteForTickerFromQuandl extends QuoteForTickerFromQuandlTrait with Loggable {
+  val DATE = "datetimestart"
+  val OPEN = "openprice"
+  val CLOSE = "closeprice"
+  val HIGH = "highprice"
+  val LOW = "lowprice"
+  val VOLUME = "volume"
+  val PREV = "openprice"
   implicit val system = ActorSystem()
   implicit val timeout: Timeout = 1000000
   val mapper = new ObjectMapper()
+
 
   private def getHistoricalQuoteMapInt(ticker: String, url: String ): Future[HttpResponse] = {
     import system.dispatcher // execution context for futures
@@ -47,17 +57,34 @@ object QuoteForTickerFromQuandl extends QuoteForTickerFromQuandl with Loggable {
 
   }
 
-  private def getHistoricalQuoteListOfRows(ticker: String, httpResponse: HttpResponse): List[GenCsvQuoteRowScottrade] = {
+  private def getHistoricalQuoteListOfRows(ticker: String, httpResponse: HttpResponse, latest: Long): List[GenCsvQuoteRowScottrade] = {
     val jsonByteArray: Array[Byte] = httpResponse.entity.data.toByteArray
     val rootNode = mapper.readTree(jsonByteArray).path("dataset")
-    val cols = rootNode.path("column_names")
+    val cols: JsonNode = rootNode.path("column_names")
     val dataArray = rootNode.path("data")
-    val listQuotes : List[GenCsvQuoteRowScottrade] = convertToQuotesArray(ticker, dataArray, fn = marshalToJsonObject)
-    listQuotes
+    val colMapper :Map[String, String] = getColMapForData(cols)
+    val listQuotes : List[GenCsvQuoteRowScottrade] = convertToQuotesArray(ticker, dataArray, mapper = colMapper, fn = marshalToJsonObject)
+    listQuotes filter(x => x.datetimeStart > latest)
   }
 
-  private def convertToQuotesArray(ticker: String, dataArray: JsonNode, mapper: Map[String, String] = Map("datetimestart"->"index 0", "datetimeend"-> "index 0", "highprice"-> "index 2"
-  , "lowprice" -> "index 3" , "openprice" -> "index 1", "closeprice" -> "index 4", "volume" -> "index 5", "prevprice" -> "index 1" ), fn: (String, JsonNode, Map[String, String]) => GenCsvQuoteRowScottrade): List[GenCsvQuoteRowScottrade] = {
+  private def getColMapForData(cols: JsonNode): Map[String, String] = {
+    var res = Map[String, String]()
+    val listOfIndices: List[JsonNode] = cols.iterator() toList
+
+    for ( l <- listOfIndices map (_.asText()) zip Range(0, listOfIndices.length)) {
+      if (l._1.toLowerCase contains("date")) res = res + (DATE -> s"index ${l._2}")
+      if (l._1.toLowerCase contains("vol")) res = res + (VOLUME -> s"index ${l._2}")
+      if (l._1.toLowerCase contains("low")) res = res + (LOW -> s"index ${l._2}")
+      if ((l._1.toLowerCase.contains("open")) ||  (l._1.toLowerCase contains("prev")) ) res = res ++ List(OPEN -> s"index ${l._2}", PREV -> s"index ${l._2}")
+      if (l._1.toLowerCase contains("close")) res = res + (CLOSE -> s"index ${l._2}")
+      if (l._1.toLowerCase contains("high")) res = res + (HIGH -> s"index ${l._2}")
+    }
+    res
+  }
+
+
+  private def convertToQuotesArray(ticker: String, dataArray: JsonNode, mapper: Map[String, String] = Map(DATE->"index 0", "datetimeend"-> "index 0", HIGH-> "index 2"
+  , LOW -> "index 3" , OPEN -> "index 1", CLOSE -> "index 4", "volume" -> "index 5", PREV -> "index 1" ), fn: (String, JsonNode, Map[String, String]) => GenCsvQuoteRowScottrade): List[GenCsvQuoteRowScottrade] = {
     val allElems: List[JsonNode] = dataArray.elements() toList
     var accumulator: List[GenCsvQuoteRowScottrade] = List()
     for (elem <- allElems) {
@@ -70,34 +97,34 @@ object QuoteForTickerFromQuandl extends QuoteForTickerFromQuandl with Loggable {
   private def marshalToJsonObject(ticker: String, elem: JsonNode, mapper: Map[String, String]): GenCsvQuoteRowScottrade = {
     if (elem.getNodeType == JsonNodeType.ARRAY) {
       val (dateTimeStart: Long, dateTimeEnd: Long) = {
-        val index = mapper("datetimestart").replaceAll("index", "").replaceAll(" ", "").toInt
+        val index = mapper(DATE).replaceAll("index", "").replaceAll(" ", "").toInt
         val dt = parseDateTime(elem.get(index).asText(), format = "yyyy-MM-dd hh:mm:ss a")
         (toStartBusinessHourOfDay(dt).getMillis, toEndBusinessHourOfDay(dt).getMillis)
       }
 
       val lowprice: Double = {
-        val index = mapper("lowprice").replaceAll("index", "").replaceAll(" ", "").toInt
+        val index = mapper(LOW).replaceAll("index", "").replaceAll(" ", "").toInt
          elem.get(index).asDouble()
       }
       val highprice: Double = {
-        val index = mapper("highprice").replaceAll("index", "").replaceAll(" ", "").toInt
+        val index = mapper(HIGH).replaceAll("index", "").replaceAll(" ", "").toInt
          elem.get(index).asDouble()
       }
       val startprice: Double = {
-        val index = mapper("openprice").replaceAll("index", "").replaceAll(" ", "").toInt
+        val index = mapper(OPEN).replaceAll("index", "").replaceAll(" ", "").toInt
          elem.get(index).asDouble()
       }
       val endprice: Double = {
-        val index = mapper("closeprice").replaceAll("index", "").replaceAll(" ", "").toInt
+        val index = mapper(CLOSE).replaceAll("index", "").replaceAll(" ", "").toInt
          elem.get(index).asDouble()
       }
       val prevprice: Double = {
-        val index = mapper("prevprice").replaceAll("index", "").replaceAll(" ", "").toInt
-         elem.get(index).asDouble()
+        val index = mapper(PREV).replaceAll("index", "").replaceAll(" ", "").toInt
+        elem.get(index).asDouble()
       }
       val volume: Double = {
-        val index = mapper("prevprice").replaceAll("index", "").replaceAll(" ", "").toInt
-         elem.get(index).asDouble()
+        val index = mapper.get(VOLUME) map {_.replaceAll("index", "").replaceAll(" ", "").toInt}
+        index map {x => elem.get(x).asDouble()} getOrElse (0.0)
       }
       GenCsvQuoteRowScottrade(dateTimeStart, dateTimeEnd, ticker,Price(prevprice),Price(endprice), Price(startprice),
         Price(highprice), Price(lowprice), Volume(volume), companyname = ticker, Percent(0))
@@ -107,28 +134,28 @@ object QuoteForTickerFromQuandl extends QuoteForTickerFromQuandl with Loggable {
     }
   }
 
-  def getHistoricalQuoteForTicker(ticker: String, urlPrefix: String): Future[List[GenCsvQuoteRowScottrade]] = {
+  def getHistoricalQuoteForTicker(ticker: String, urlPrefix: String, latest: Long): Future[List[GenCsvQuoteRowScottrade]] = {
     val fut = getHistoricalQuoteInt(ticker, urlPrefix)
-    fut  map (httpResponse =>  getHistoricalQuoteListOfRows(ticker, httpResponse))
+    fut  map (httpResponse =>  getHistoricalQuoteListOfRows(ticker, httpResponse, latest))
   }
 
-  def getHistoricalQuoteMap(ticker: String, url: String): Future[List[GenCsvQuoteRowScottrade]] = {
+  def getHistoricalQuoteMap(ticker: String, url: String, latest: Long): Future[List[GenCsvQuoteRowScottrade]] = {
     val fut = getHistoricalQuoteMapInt(ticker, url)
-    fut  map (httpResponse =>  getHistoricalQuoteListOfRows(ticker, httpResponse))
+    fut  map (httpResponse =>  getHistoricalQuoteListOfRows(ticker, httpResponse, latest))
   }
 
-  override def createYearlyFilesForMaps(ticker: String, dir: String, url: String) = {
+  override def createYearlyFilesForMaps(ticker: String, dir: String, url: String, latest: Long): Future[Unit] = {
     logger.info(ticker)
-    val listOfQuotesFut = getHistoricalQuoteMap(ticker, url)
+    val listOfQuotesFut = getHistoricalQuoteMap(ticker, url, latest)
     val l = listOfQuotesFut map (listOfQuotes => divideIntoYearlyBins(ticker, listOfQuotes)) map (x => writeYearlyFilesFromYearlyQuotes(ticker,x,dir))
-    Await.result(l, Duration.Inf)
+    l
   }
 
-  override def createYearlyFilesForTicker(ticker: String, dir: String, urlPrefix: String) = {
+  override def createYearlyFilesForTicker(ticker: String, dir: String, urlPrefix: String, latest: Long): Future[Unit] = {
     logger.info(ticker)
-    val listOfQuotesFut = getHistoricalQuoteForTicker(ticker, urlPrefix)
+    val listOfQuotesFut = getHistoricalQuoteForTicker(ticker, urlPrefix, latest)
     val l = listOfQuotesFut map (listOfQuotes => divideIntoYearlyBins(ticker, listOfQuotes)) map (x => writeYearlyFilesFromYearlyQuotes(ticker,x,dir))
-    Await.result(l, Duration.Inf)
+    l
   }
 
   private def divideIntoYearlyBins(ticker: String, quotes: List[GenCsvQuoteRowScottrade]): Map[String, List[GenCsvQuoteRowScottrade]] = {
@@ -149,8 +176,16 @@ object QuoteForTickerFromQuandl extends QuoteForTickerFromQuandl with Loggable {
 
   private def writeYearlyFilesFromYearlyQuotes(ticker: String, yearlyQuotes: Map[String, List[GenCsvQuoteRowScottrade]], dir: String) = {
     implicit val formats = DefaultFormats
+    var lastYear: String = "0"
+    var lastRowDateTime : Long = 0
     for (mp <- yearlyQuotes) {
       FileUtils.writeFile(dir + "/" + mp._1 + "/" + ticker, writePretty(mp._2))
+      lastYear = if (mp._1 > lastYear) mp._1 else lastYear
+      lastRowDateTime = if (mp._2.reverse.head.datetimeStart > lastRowDateTime) mp._2.reverse.head.datetimeStart else lastRowDateTime
+
     }
+
+    FileUtils.writeFile(dir + "/" + lastYear + "/" + ticker + "lasttimeprocessed", lastRowDateTime.toString)
+
   }
 }

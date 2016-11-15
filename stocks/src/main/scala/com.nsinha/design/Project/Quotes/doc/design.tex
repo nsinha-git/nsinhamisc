@@ -34,7 +34,7 @@
 
 \title[Anomaly Detection System Overview]
 {%
-Stocks project
+Quotes project
 %
 }
 
@@ -114,60 +114,16 @@ Stocks project
 
 \subsection{Flow Diagram }
 
-\begin{frame}
-	\begin{tikzpicture}[scale=0.71]
-		\coordinate (B1_L) at (0,0);
-		\coordinate (B1_R) at (5,2);
-		\coordinate (B2_L) at (6,0);
-		\coordinate (B2_R) at (11,2);
-		\coordinate (B3_L) at (3,5);
-		\coordinate (B3_R) at (9,7);
-		\coordinate (B4_L) at (0,-3);
-		\coordinate (B4_R) at (5,-1);
-		\coordinate (B5_L) at (6,-3);
-		\coordinate (B5_R) at (11,-1);
-
-		\drawBox{B1_L}{B1_R}{QuoteRow}{red}{0}
-		\drawBox{B2_L}{B2_R}{OrderRow}{red}{0}
-		\drawBox{B3_L}{B3_R}{CsvRow}{blue}{0}
-		\drawBox{B4_L}{B4_R}{ScottradeDailyQuoteRow}{purple}{0}
-		\drawBox{B5_L}{B5_R}{ScottradeOrderRow}{purple}{0}
-		\drawLinkArrowVertical {B3_L}{B3_R}{B1_L}{B1_R}
-		\drawLinkArrowVertical {B3_L}{B3_R}{B2_L}{B2_R}
-		\drawLinkArrowVertical {B1_L}{B1_R}{B4_L}{B4_R}
-		\drawLinkArrowVertical {B2_L}{B2_R}{B5_L}{B5_R}
-
-	\end{tikzpicture}
-\end{frame}
-
-\subsection{Projects-1 }
-\begin{frame}
-	\begin{itemize}
-		\item JsonCsv(The most basic JSoncsv formatter)
-		\item YearlyQuotes
-		\item DailyQuote
-		\item Orders
-		\item TimeSeries
-		\item QuandlOHLCDump
-	\end{itemize}
-
-\end{frame}
-
-
-\begin{frame}{ALL projects}
+\begin{frame}{Quotes}
     \begin{itemize}
 	\item Quotes (Scottrade) 
     		\begin{itemize}
 			\item DailyQuotes
-				This project ingests a daily quote file from scottrade and outputs the deserialized rows in specific format. We may append this deserialized form to an aggregate file.
+				This project ingests a daily quote file from scottrade and outputs the deserialized rows in specific format. We may append this deserialized form to an aggregate file.Json Serialization.
 			\item ConsumeAllDailyQuotes
-				This project can process a whole dir of quotes files using \textbf{DailyQuotes} and append to aggegate file.
+				This project can process a whole dir of quotes files using \textbf{DailyQuotes} and append to aggegate file. It uses a metafile to track deduplication.
     		\end{itemize}
-	\item Orders (Scottrade)
-		This can ingest a order file and a daily quote file and produce the break up of losses and gains of past and present holdings. Holdings are grouped under symbols. We can split a single ticker as per their  purchase dates. 
-	\item 
-
-    \end{itemize}
+	    \end{itemize}
 \end{frame}
 
 \begin{frame}{Daily Quote data structure}
@@ -216,32 +172,6 @@ Stocks project
 		\item We can assume we have year loads of files containg day's data for years in past and current. The current year is still getting loaded.
 
 		\item We can analyze these files for specific stock dumps. like dumping the flow data and analyzing it in python etc.
-	\end{itemize}
-\end{frame}
-
-
-\begin{frame}{Order project}
-	\begin{itemize}
-		\item The order project checks current orders and prepares tranactions. Transaction is narrowly defined based on certain impl critrerias.
-		\item Order project also depends on the quote project to get the latest quote of currently held stocks.
-		\item We may need a csv project that can suitably render any json file produced by this project to a csv file based on  certain translation parameters may be provided as part of metadata.
-		
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{CSV project}
-	\begin{itemize}
-		\item Read a arbirary json and convert it to csv
-		\item arbitrary json will not be too arbitrary. There will be highest level arrays understood as rows.
-		\item each row object will have only key value pairs. the value can be arbitrary object whose only one value can be displayed(this will be passed as metadata key).
-		\item a DI map file for mpping fields fom json to csv should be provided and can be customized.
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Yearly Analysis Project}
-	\begin{itemize}
-		\item Read a lots of  daily json file for all the stocks. Create yearly files of it.
-		\item create a Time series  on some axis for each stock.
 	\end{itemize}
 \end{frame}
 

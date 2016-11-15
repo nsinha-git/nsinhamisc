@@ -4,6 +4,7 @@ import java.io.{File, FileWriter}
 
 import com.nsinha.data.Csv._
 import com.nsinha.data.Project.CsvDailyQuotesScottradeProject
+import com.nsinha.impls.Project.JsonCsvProject.JsonUtils
 import com.nsinha.utils._
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 import org.joda.time.DateTime
