@@ -1,6 +1,7 @@
 package com.nsinha.apps.QuandlApps
 
 import com.nsinha.impls.Project.QuandlOHLCDump.QuoteForTickerFromQuandl
+import com.nsinha.impls.Project.QuandlOHLCDump.QuoteForBondFromQuandl
 import com.nsinha.utils.Loggable
 
 import scala.concurrent.{Await, duration}
@@ -12,7 +13,7 @@ import scala.concurrent.duration.{Duration, FiniteDuration}
   */
 
 
-object QuandlIndexes extends  Loggable{
+object QuandlIndexesAndBonds extends  Loggable{
 
  val INDEXES = Map("DJI" -> "https://www.quandl.com/api/v3/datasets/YAHOO/INDEX_DJI.json?api_key=Xmky6espzDoofkY9CFar",
 "RUSSELL" -> "https://www.quandl.com/api/v3/datasets/GOOG/AMS_RTWO.json?api_key=Xmky6espzDoofkY9CFar",
@@ -25,11 +26,12 @@ object QuandlIndexes extends  Loggable{
 "DAX" -> "https://www.quandl.com/api/v3/datasets/ZEP/DAX.json?api_key=Xmky6espzDoofkY9CFar"
   )
 
-  val BONDS = Map("USTREASURY" -> "https://www.quandl.com/api/v3/datasets/USTREASURY/YIELD.json?api_key=Xmky6espzDoofkY9CFar")
+  val BONDS = Map("USTRE" -> "https://www.quandl.com/api/v3/datasets/USTREASURY/YIELD.json?api_key=Xmky6espzDoofkY9CFar")
 
 
   def run() = {
-    val fut = INDEXES map (kv => QuoteForTickerFromQuandl.createYearlyFilesForMaps(kv._1, "/Users/nishchaysinha/stocksdatadir/ohlc/yearlies",kv._2,0))
+    val futIndexes = INDEXES map (kv => QuoteForTickerFromQuandl.createYearlyFilesForMaps(kv._1, "/Users/nishchaysinha/stocksdatadir/ohlc/yearlies",kv._2,0))
+    val futBonds  = BONDS map (kv => QuoteForBondFromQuandl.createYearlyFilesForMaps(kv._1, "/Users/nishchaysinha/stocksdatadir/ohlc/yearlies",kv._2,0))
     //fut map {x => Await.ready(x, FiniteDuration(1, duration.MINUTES))}
   }
 

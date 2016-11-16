@@ -11,7 +11,7 @@ object ClosingPriceIndexes {
 
   def run() = {
     ClosingPriceRecords.processYears(Range(1990, 2017).toList, outputFileRelative = "output/indexesclosingprice.json",
-      admitTickers = INDEXES)
+      admitTickers = INDEXES, jsonFileNameRootDir  = "/Users/nishchaysinha/stocksdatadir/ohlc/yearlies")
   }
 
   def main(args: Array[String]) {

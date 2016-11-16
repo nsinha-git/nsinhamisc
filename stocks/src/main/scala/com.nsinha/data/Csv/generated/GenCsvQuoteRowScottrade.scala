@@ -46,5 +46,26 @@ object GenCsvQuoteRowScottrade
       fn
 
     }
+
+  def normalizePrice(tobeNormalized: Price, normal: Price): Price = {
+    if(normal.value == 0) return Price(0)
+    Price(tobeNormalized.value / normal.value)
+  }
+
+  def normalizeVolume(tobeNormalized: Volume, normal: Volume): Volume = {
+    if(normal.value == 0) return Volume(0)
+    Volume(tobeNormalized.value / normal.value)
+  }
+
+  def normalize(tobeNormalized: GenCsvQuoteRowScottrade,normalElem: GenCsvQuoteRowScottrade) : GenCsvQuoteRowScottrade = {
+    tobeNormalized.copy(
+      prevprice = normalizePrice(tobeNormalized.prevprice, normalElem.endprice),
+      endprice = normalizePrice(tobeNormalized.endprice, normalElem.endprice),
+      startprice = normalizePrice(tobeNormalized.startprice, normalElem.endprice),
+      highprice = normalizePrice(tobeNormalized.highprice, normalElem.endprice),
+      lowprice = normalizePrice(tobeNormalized.lowprice, normalElem.endprice),
+      volume = normalizeVolume(tobeNormalized.volume, normalElem.volume)
+    )
+  }
 }
 

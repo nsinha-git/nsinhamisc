@@ -8,7 +8,7 @@ import com.nsinha.impls.Project.QuandlOHLCDump.TimeSeriesRecordsFromYearly.Closi
 object ClosingPriceAll {
   def run() = {
     ClosingPriceRecords.processYears(Range(1990, 2017).toList, outputFileRelative = "output/closingprice.json",
-      admitTickers = List())
+      admitTickers = List(),    jsonFileNameRootDir  = "/Users/nishchaysinha/stocksdatadir/ohlc/yearlies")
   }
 
   def main(args: Array[String]) {

@@ -9,7 +9,7 @@ object SingleYearlyFile {
 
   def run() = {
     for (year <- Range(2011,2017)) {
-      ConcatenateJsonFiles.processDirectory(s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/${year}", outputfile = "combinedData.json")
+      ConcatenateJsonFiles.processDirectory(s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/${year}/normalized", outputfile = "combinedData.json")
     }
   }
 
