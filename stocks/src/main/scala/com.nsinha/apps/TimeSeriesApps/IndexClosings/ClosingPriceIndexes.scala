@@ -10,6 +10,7 @@ object ClosingPriceIndexes {
 
 
   def run() = {
+    //override def processDir(inputFile: String, outFileDir: String = "output/closingprice", admitTickers: List[String])
     ClosingPriceRecords.processYears(Range(1990, 2017).toList, outputFileRelative = "output/indexesclosingprice.json",
       admitTickers = INDEXES, jsonFileNameRootDir  = "/Users/nishchaysinha/stocksdatadir/ohlc/yearlies")
   }

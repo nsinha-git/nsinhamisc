@@ -1,11 +1,14 @@
 package com.nsinha.impls.Project.QuandlOHLCDump
 
+import java.io.{File, FileReader, LineNumberReader}
+
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 import akka.actor.ActorSystem
 import akka.io.IO
 import spray.can.Http
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import com.nsinha.impls.Project.JsonCsvProject.JsonUtils
 import com.nsinha.utils.DateTimeUtils._
 import com.nsinha.utils.{DateTimeUtils, FileUtils, Loggable}
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
@@ -15,6 +18,7 @@ import org.json4s.native.Serialization._
 
 import scala.collection.convert.WrapAsScala._
 import scala.concurrent.Future
+import scala.io.Source
 
 /**
   * Created by nishchaysinha on 11/15/16.
@@ -37,14 +41,26 @@ trait BaseQuandlTrait{
     implicit val formats = DefaultFormats
     var lastYear: String = "0"
     var lastRowDateTime : Long = 0
+
+
     for (mp <- yearlyQuotes) {
-      FileUtils.writeFile(dir + "/" + mp._1 + "/" + ticker, writePretty(mp._2))
+      val metaDataLastProcessedDateFileNameTemp = dir + "/" + mp._1 + "/" + ticker + "lasttimeprocessed"
+      val  lastTs = {
+        if (new File(metaDataLastProcessedDateFileNameTemp).exists()) {
+          val src =  new LineNumberReader(new FileReader(new  File(metaDataLastProcessedDateFileNameTemp)))
+          src.readLine().toLong
+        } else {
+          0
+        }
+      }
+      val toAppendFile = dir + "/" + mp._1 + "/" + ticker
+      JsonUtils.appendToAJsonFile(toAppendFile, writePretty(mp._2.filter(x => x.datetimeStart > lastTs)))
       lastYear = if (mp._1 > lastYear) mp._1 else lastYear
       lastRowDateTime = if (mp._2.reverse.head.datetimeStart > lastRowDateTime) mp._2.reverse.head.datetimeStart else lastRowDateTime
-
     }
 
-    FileUtils.writeFile(dir + "/" + lastYear + "/" + ticker + "lasttimeprocessed", lastRowDateTime.toString)
+    val metaDataLastProcessedDateFileName = dir + "/" + lastYear + "/" + ticker + "lasttimeprocessed"
+    FileUtils.writeFile(metaDataLastProcessedDateFileName, lastRowDateTime.toString)
 
   }
 

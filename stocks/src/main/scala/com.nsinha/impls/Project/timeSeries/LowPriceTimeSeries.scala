@@ -6,21 +6,21 @@ import com.nsinha.impls.Project.TimeSeries.Doubles_ignore.{Size2, TimeSeriesDoub
   * Created by nishchaysinha on 10/6/16.
   */
 class LowPriceTimeSeries(inFileName: String, key :String = "symbol", axes: List[String] = List("lowprice"),
-                             pathToAxisValue: Map[String, List[String]] = Map("lowprice" -> List("value")))
-  extends TimeSeries(inFileName, key,axes, pathToAxisValue, None, None) {
+                             pathToAxisValue: Map[String, List[String]] = Map("lowprice" -> List("value")), admitTickers: List[String] = List())
+  extends TimeSeries(inFileName, key,axes, pathToAxisValue, None, None,None, admitTickers) {
 }
 
 class LowPriceNormalizedTimeSeries(inFileName: String, key :String = "symbol", axes: List[String] = List("lowprice"),
                                        pathToAxisValue: Map[String, List[String]] = Map("lowprice"-> List("value")))
   extends TimeSeries(inFileName, key,axes, pathToAxisValue, None, Some(PriceNormalizedTimeSeries.dividePriceByMaximumInRange),
-    None) {
+    None, Nil) {
   override def getTransformed = PriceNormalizedTimeSeries.filterByNmonthsContinuousIncreaseSampledAtIntervals(getTransformed1)
   def getTransformed1 = PriceNormalizedTimeSeries.filterPriceByRecentToppings(super.getTransformed)
 }
 
 class LowPriceToClosingNormalizedTimeSeries(inFileName: String, key :String = "symbol", axes: List[String] = List("endprice", "lowprice"),
                              pathToAxisValue: Map[String, List[String]] = Map("endprice"-> List("value"), "lowprice" -> List("value")))
-  extends TimeSeries(inFileName, key,axes, pathToAxisValue, Option(LowPriceTimeSeries.findNormalizedDiff), None) {
+  extends TimeSeries(inFileName, key,axes, pathToAxisValue, Option(LowPriceTimeSeries.findNormalizedDiff), None, None, Nil) {
 
 }
 

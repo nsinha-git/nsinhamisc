@@ -26,7 +26,7 @@ object TimeSeries {
 
 class TimeSeries(inputJsonFileName: String, key: String = "symbol", axes: List[String] , pathToAxisValue:Map[String,List[String]] = Map(),
                  fnOpt: Option[List[Double] => Double] = None, transformFnOpt: Option[(List[Double], (Double, Int)) => Double] = None,
-                 filterFn: Option[(Map[String, List[Double]]) => Map[String, List[Double]]] = None, tickerToAdmit: List[String] = List()) extends  Loggable {
+                 filterFn: Option[(Map[String, List[Double]]) => Map[String, List[Double]]] = None, tickerToAdmit: List[String]) extends  Loggable {
   val inputFile = new File(inputJsonFileName)
   val mapper = new ObjectMapper()
   val timeSeries: Map[String, List[Double]] = processTimeSeries()

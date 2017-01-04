@@ -5,8 +5,8 @@ package com.nsinha.impls.Project.TimeSeries
   */
 
 class HighPriceTimeSeries(inFileName: String, key :String = "symbol", axes: List[String] = List("highprice"),
-                         pathToAxisValue: Map[String, List[String]] = Map("highprice" -> List("value")))
-  extends TimeSeries(inFileName, key,axes, pathToAxisValue, None, None) {
+                         pathToAxisValue: Map[String, List[String]] = Map("highprice" -> List("value")), admitTickers: List[String] = List())
+  extends TimeSeries(inFileName, key,axes, pathToAxisValue, None, None, None,admitTickers) {
 }
 
 

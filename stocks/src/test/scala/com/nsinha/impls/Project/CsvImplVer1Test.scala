@@ -5,7 +5,7 @@ import java.io.{File, FileInputStream, FileWriter}
 import com.nsinha.apps.OrdersApps.OrderAnalysis
 import com.nsinha.impls.Project.TimeSeries._
 import com.nsinha.data.Csv.Price
-import com.nsinha.impls.Project.JsonCsvProject.{ConcatenateJsonFiles, JsonCsvProjectImpl, JsonUtils}
+import com.nsinha.impls.Project.JsonCsvProject.{ConcatenateJsonUtils$, JsonCsvProjectImpl, JsonUtils}
 import com.nsinha.impls.Project.QuandlOHLCDump.TimeSeriesRecordsFromYearly._
 import com.nsinha.impls.Project.Quotes.Scottrade.{ConsumeAllScottradeQuotes, CsvDailyQuotesScottradeProjectImpl}
 import com.nsinha.impls.Project.YearlyQuoteAnalysisProject.YearlyQuoteAnalysisProjectImpl

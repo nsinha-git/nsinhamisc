@@ -52,6 +52,7 @@ object QuoteForTickerFromQuandl extends QuoteForTickerFromQuandlTrait with Logga
     val dataArray = rootNode.path("data")
     val colMapper :Map[String, String] = getColMapForData(cols)
     val listQuotes : List[GenCsvQuoteRowScottrade] = convertToQuotesArray(ticker, dataArray, mapper = colMapper, fn = marshalToJsonObject)
+    logger.info(s"$ticker ${listQuotes.length}")
     listQuotes filter(x => x.datetimeStart > latest)
   }
 

@@ -2,17 +2,18 @@ package com.nsinha.impls.Project.JsonCsvProject
 
 import java.io.File
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.nsinha.utils.FileUtils
 
 /**
   * Created by nishchaysinha on 10/10/16.
   */
-trait ConcatenateJsonFiles {
+trait ConcatenateJsonUtils {
   def processDirectory(dir: String, outputdir: String, outputfile: String)
+  def concatenateJsonString(jsonStrings: List[String]): String
 }
 
-object ConcatenateJsonFiles extends ConcatenateJsonFiles {
+object ConcatenateJsonUtils extends ConcatenateJsonUtils {
   val mapper = new ObjectMapper()
   override def processDirectory(dir: String, outputdirIn: String = "", outputfile: String) = {
     val srcDir = new File(dir)
@@ -33,5 +34,12 @@ object ConcatenateJsonFiles extends ConcatenateJsonFiles {
     if (lastTree != null)
       JsonUtils.writeToFile(new File(destFile), mapper.writerWithDefaultPrettyPrinter().writeValueAsString(lastTree))
 
+  }
+
+  def concatenateJsonString(jsonStrings: List[String]): String = {
+    val concatNode = jsonStrings.foldLeft(null: JsonNode) { (z, el) =>
+      JsonUtils.appendToJsonNode(z, mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(el)))
+    }
+    mapper.writerWithDefaultPrettyPrinter().writeValueAsString(concatNode)
   }
 }

@@ -30,8 +30,8 @@ object QuandlIndexesAndBonds extends  Loggable{
 
 
   def run() = {
-    val futIndexes = INDEXES map (kv => QuoteForTickerFromQuandl.createYearlyFilesForMaps(kv._1, "/Users/nishchaysinha/stocksdatadir/ohlc/yearlies",kv._2,0))
-    val futBonds  = BONDS map (kv => QuoteForBondFromQuandl.createYearlyFilesForMaps(kv._1, "/Users/nishchaysinha/stocksdatadir/ohlc/yearlies",kv._2,0))
+    val futIndexes = INDEXES map (kv => QuoteForTickerFromQuandl.createYearlyFilesForMaps(kv._1, "/Users/nishchaysinha/stocksdatadir/ohlc/yearlies",kv._2, "1451606400000".toLong))
+    val futBonds  = BONDS map (kv => QuoteForBondFromQuandl.createYearlyFilesForMaps(kv._1, "/Users/nishchaysinha/stocksdatadir/ohlc/yearlies",kv._2, "1451606400000".toLong))
     //fut map {x => Await.ready(x, FiniteDuration(1, duration.MINUTES))}
   }
 

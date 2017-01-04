@@ -28,6 +28,13 @@ object JsonUtils {
     fw.close
   }
 
+  def writeToFile(file: String, opStr: String) = {
+    val fw = new FileWriter(file)
+    fw.write(opStr)
+    fw.flush()
+    fw.close
+  }
+
   def appendToJsonNode(prevTree: JsonNode, jsonString: String): JsonNode = {
     val curTree: JsonNode = mapper.readTree(jsonString)
     if (prevTree != null && prevTree.isMissingNode == false) mergeNodes(prevTree, curTree) else curTree

@@ -3,7 +3,7 @@ package com.nsinha.impls.Project.QuandlOHLCDump.DerivedIndex
 import java.io.File
 
 import com.nsinha.data.Csv.{Percent, Price, Volume}
-import com.nsinha.utils.FileUtils
+import com.nsinha.utils.{FileUtils, Loggable}
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods._
@@ -12,11 +12,11 @@ import org.json4s.native.Serialization._
 /**
   * Created by nishchaysinha on 11/15/16.
   */
-object DerivedNormalizedIndex {
+object DerivedNormalizedIndex extends Loggable{
 
   implicit val formats = DefaultFormats
   def processDirectory(dir: String, outputdirIn: String = "", listOfTickersInIndex: List[String], index: String): Unit = {
-    println(index)
+    logger.info(index)
     val srcDir = new File(dir)
     assert(srcDir.isDirectory == true)
     val outputdir = if (outputdirIn == "") dir   else outputdirIn

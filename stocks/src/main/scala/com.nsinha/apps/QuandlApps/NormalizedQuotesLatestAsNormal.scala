@@ -1,6 +1,6 @@
 package com.nsinha.apps.QuandlApps
 
-import com.nsinha.impls.Project.JsonCsvProject.ConcatenateJsonFiles
+import com.nsinha.impls.Project.JsonCsvProject.ConcatenateJsonUtils$
 import com.nsinha.impls.Project.QuandlOHLCDump.NormalizedOHLC.NormalizeTickers
 
 /**
@@ -8,7 +8,7 @@ import com.nsinha.impls.Project.QuandlOHLCDump.NormalizedOHLC.NormalizeTickers
   */
 object NormalizedQuotesLatestAsNormal {
   def run() = {
-    for (year <- Range(2000,2017)) {
+    for (year <- List(2016)) {
       NormalizeTickers.processDirectory(s"/Users/nishchaysinha/stocksdatadir/ohlc/yearlies/${year}")
     }
   }

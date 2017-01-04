@@ -11,9 +11,10 @@ import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 
 
 class ConsumeAllScottradeQuotes(processDir: String, desDirIn: String = "") extends Loggable {
+  import ConsumeAllScottradeQuotes._
   def apply(): Unit = {
     val destDir = if (desDirIn == "") processDir + "/processed" else desDirIn
-    moveAllFilesToCorrectNameFormat
+    moveAllFilesToCorrectNameFormat(processDir)
     val processDirFile = new File(processDir)
     val path = processDirFile.getAbsolutePath
     val allFiles = processDirFile.list()
@@ -32,7 +33,12 @@ class ConsumeAllScottradeQuotes(processDir: String, desDirIn: String = "") exten
     }
   }
 
-  def moveAllFilesToCorrectNameFormat: Unit = {
+
+}
+
+
+object ConsumeAllScottradeQuotes {
+  def moveAllFilesToCorrectNameFormat(processDir: String): Unit = {
     val processDirFile = new File(processDir)
     val path = processDirFile.getAbsolutePath
     val allFiles = processDirFile.list()

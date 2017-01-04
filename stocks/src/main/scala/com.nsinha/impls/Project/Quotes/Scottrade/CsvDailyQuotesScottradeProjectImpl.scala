@@ -4,7 +4,7 @@ import java.io.{File, FileWriter}
 
 import com.nsinha.data.Csv._
 import com.nsinha.data.Project.CsvDailyQuotesScottradeProject
-import com.nsinha.impls.Project.JsonCsvProject.JsonUtils
+import com.nsinha.impls.Project.JsonCsvProject.{ConcatenateJsonUtils, JsonUtils}
 import com.nsinha.utils._
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 import org.joda.time.DateTime
@@ -87,6 +87,8 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, quotesFilePathIn
     }
   }
 
+
+
   override def writeTopVolumesForToday(i: Int): List[GenCsvQuoteRowScottrade] = {
     implicit val format = DefaultFormats
     rows.sortWith(GenCsvQuoteRowScottrade.sort("volume", true) )
@@ -143,4 +145,28 @@ class CsvDailyQuotesScottradeProjectImpl(modelFilePath: String, quotesFilePathIn
      volume = Volume(rowCols("volume")), companyname = rowCols("companyname"), percentagechange = Percent(rowCols("percentchange"))
    )
  }
+
+  override def  appendDataToRespectiveYearFile(yearFileDirRoot: String,year: Int): Unit = {
+    implicit val format = DefaultFormats
+    for (row <- rows) {
+      println(row.symbol)
+      val toAppendFile = yearFileDirRoot + "/" + year.toString + "/" +  row.symbol
+      val metafile = toAppendFile + "lasttimeprocessed"
+      val lastUpdateTime: Long = readLinesFromFile(metafile).headOption.getOrElse("0") toLong
+
+      if (row.datetimeStart > lastUpdateTime) {
+        val json = writePretty(row)
+        JsonUtils.appendToAJsonFile(toAppendFile, json)
+        FileUtils.writeFile(metafile, row.datetimeStart.toString)
+      } else {
+        logger.info("skipping")
+      }
+    }
+  }
+
+  private def readLinesFromFile(fileName: String): List[String] = {
+    val src: Source = FileUtils.openOrCreateFile(new File(fileName))
+    val allLines = src.getLines()
+    allLines toList
+  }
 }
