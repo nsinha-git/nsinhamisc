@@ -24,12 +24,7 @@ import org.json4s.native.Serialization.writePretty
 import scala.concurrent.Await
 import scala.io.Source
 
-class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with Loggable {
-
-
-
-
-
+class CsvImplVer1Test extends FunSuite with ShouldMatchers with Injectable with Loggable {
 
   test("csvtest2") {
     val jsonFileName = "/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/testCombine"
@@ -39,7 +34,7 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
 
   test("testYearlyTS"){
     val analysisProject = new YearlyQuoteAnalysisProjectImpl("/Users/nishchaysinha/nsinhamisc/stocks/src/test/resources/2016-aggregate-data.txt")
-    val str = analysisProject.createTimeSeries[Price](axisString = "endprice", canBuildT =  new Price(0))
+    val str = analysisProject.createTimeSeries[Price](axisString = "endprice", canBuildT = new Price(0))
     logger.info(str)
   }
 
@@ -56,25 +51,21 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
   test("process normalized closing price with filtering") {
     val clpTsObject = new ClosingPriceNormalizedTimeSeries("/Users/nishchaysinha/stocksdatadir/currentPerformance/output/yearly/2016/combinedData.json")
     val ts = clpTsObject.getTransformed
-    val ts_winnersFor15days  = PriceNormalizedTimeSeries.getTheWinnersPastIntervals(ts, 15)
-    val ts_winnersFor30days  = PriceNormalizedTimeSeries.getTheWinnersPastIntervals(ts, 30)
+    val ts_winnersFor15days = PriceNormalizedTimeSeries.getTheWinnersPastIntervals(ts, 15)
+    val ts_winnersFor30days = PriceNormalizedTimeSeries.getTheWinnersPastIntervals(ts, 30)
 
     implicit val format = DefaultFormats
     val jsonStr = writePretty(ts)
     val jsonFileName = "/Users/nishchaysinha/stocksdatadir/currentPerformance/output/yearly/2016/closingpricenormalized.json"
-    val jsonFileName15days = jsonFileName + ".15days.json"
-    val jsonFileName30days = jsonFileName + ".30days.json"
+    val jsonFileName15days = jsonFileName+".15days.json"
+    val jsonFileName30days = jsonFileName+".30days.json"
     FileUtils.writeFile(jsonFileName, jsonStr)
     FileUtils.writeFile(jsonFileName15days, writePretty(ts_winnersFor15days))
-    FileUtils.writeFile(jsonFileName30days, writePretty(ts_winnersFor30days) )
+    FileUtils.writeFile(jsonFileName30days, writePretty(ts_winnersFor30days))
     writeCsvFile(jsonFileName)
     writeCsvFile(jsonFileName15days)
     writeCsvFile(jsonFileName30days)
   }
-
-
-
-
 
   test("low price") {
     val cl_lp_TsObject = new LowPriceNormalizedTimeSeries("/Users/nishchaysinha/stocksdatadir/currentPerformance/output/yearly/2016/combinedData.json")
@@ -83,9 +74,9 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
     val jsonStr = writePretty(ts)
     val jsonFileName = "/Users/nishchaysinha/stocksdatadir/currentPerformance/output/yearly/2016/lowprice.json"
     FileUtils.writeFile(jsonFileName, jsonStr)
-    val jsonCsv = new JsonCsvProjectImpl(modelFile = "" , jsonFile = jsonFileName, csvFile = "")
+    val jsonCsv = new JsonCsvProjectImpl(modelFile = "", jsonFile = jsonFileName, csvFile = "")
     val str = jsonCsv.changeAJsonToTsCsv()
-    val fw = new FileWriter(jsonFileName + ".csv")
+    val fw = new FileWriter(jsonFileName+".csv")
     fw.write(str)
     fw.close()
   }
@@ -97,9 +88,9 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
     val jsonStr = writePretty(ts)
     val jsonFileName = "/Users/nishchaysinha/stocksdatadir/currentPerformance/output/yearly/2016/lowpricenormalized.json"
     FileUtils.writeFile(jsonFileName, jsonStr)
-    val jsonCsv = new JsonCsvProjectImpl(modelFile = "" , jsonFile = jsonFileName, csvFile = "")
+    val jsonCsv = new JsonCsvProjectImpl(modelFile = "", jsonFile = jsonFileName, csvFile = "")
     val str = jsonCsv.changeAJsonToTsCsv()
-    val fw = new FileWriter(jsonFileName + ".csv")
+    val fw = new FileWriter(jsonFileName+".csv")
     fw.write(str)
     fw.close()
   }
@@ -111,9 +102,9 @@ class CsvImplVer1Test extends FunSuite with  ShouldMatchers with Injectable with
     val jsonStr = writePretty(ts)
     val jsonFileName = "/Users/nishchaysinha/stocksdatadir/currentPerformance/output/yearly/2016/lowpricetoclosingpricenormalized.json"
     FileUtils.writeFile(jsonFileName, jsonStr)
-    val jsonCsv = new JsonCsvProjectImpl(modelFile = "" , jsonFile = jsonFileName, csvFile = "")
+    val jsonCsv = new JsonCsvProjectImpl(modelFile = "", jsonFile = jsonFileName, csvFile = "")
     val str = jsonCsv.changeAJsonToTsCsv()
-    val fw = new FileWriter(jsonFileName + ".csv")
+    val fw = new FileWriter(jsonFileName+".csv")
     fw.write(str)
     fw.close()
   }

@@ -3,8 +3,7 @@ package com.nsinha.apps.DailyQuotesApps
 import com.nsinha.impls.Project.Quotes.Scottrade.CsvDailyQuotesScottradeProjectImpl
 import main.scala.com.nsinha.data.Csv.generated.GenCsvQuoteRowScottrade
 
-/**
-  * Created by nishchaysinha on 11/14/16.
+/** Created by nishchaysinha on 11/14/16.
   */
 object DailyQuotes {
 
@@ -15,9 +14,8 @@ object DailyQuotes {
     val topFlowers = quoteImpl.writeTopFlowersForToday(10)
   }
 
-  def main(args: Array[String]) {
+  def main(args : Array[String]) {
     run()
   }
-
 
 }
