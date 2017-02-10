@@ -86,6 +86,7 @@ object JsonUtils {
 
     val opStr = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(t3);
     println(opStr)
+    xmlExample
 
   }
 
@@ -95,5 +96,27 @@ object JsonUtils {
     val fw = new FileWriter(jsonFileName + ".csv")
     fw.write(str)
     fw.close()
+  }
+
+
+
+  def xmlExample = {
+    val xml: scala.xml.Elem = scala.xml.XML.loadString(
+    """
+        |<users>
+        |   <user>
+        |     <id>1</id>
+        |     <name>manjari</name>
+        |    </user>
+        |    <user>
+        |     <id>2</id>
+        |     <name>gandhi</name>
+        |    </user>
+        |</users>
+      """.stripMargin)
+    val printer = new scala.xml.PrettyPrinter(80, 2)
+    val s = printer.format(xml)
+    println(s)
+
   }
 }
