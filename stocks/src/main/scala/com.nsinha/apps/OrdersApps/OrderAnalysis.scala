@@ -22,8 +22,8 @@ object OrderAnalysis {
   }
 
   def run() = {
-    val quoteFile = "/Users/nsinha/Downloads/Securities_to_Watch2017.02.28.15.09.32.csv"
-    val orderFile = "/Users/nsinha/Downloads/CompletedOrders2017.02.28.14.39.49.csv"
+    val quoteFile = "/Users/nsinha/Downloads/Securities_to_Watch2017.04.26.15.24.17.csv"
+    val orderFile = "/Users/nsinha/Downloads/CompletedOrders2017.04.26.15.23.26.csv"
     OrderAnalysis(quoteFile, orderFile, "/Users/nsinha/Desktop/byDateHolds.json", "/users/nsinha/Desktop/bySymbolHolds.json")
   }
 
